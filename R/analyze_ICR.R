@@ -23,6 +23,7 @@ analyze_ICR <- function(df_ICR, group_vector, control_label = "Control", case_la
 
    # Load required library
   library(ggplot2)
+  library(reshape2)
   
   # Ensure the group_vector is a factor
   group_vector <- factor(group_vector, levels = c(control_label, case_label))
