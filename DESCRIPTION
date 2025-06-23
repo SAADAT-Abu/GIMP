@@ -1,11 +1,10 @@
 Package: GIMP
 Title: Genomic Imprinting Methylation Patterns
 Version: 0.2.0
-Author: Francesco Cecere <francesco.cecerengs@gmail.com>
 Authors@R: c(
     person(given = "Francesco", family = "Cecere", role = "cre",
            email = "francesco.cecerengs@gmail.com"),
-    person(given = "Abu", family = "Saadat", role = "cre",
+    person(given = "Abu", family = "Saadat", role = "aut",
            email = "saadatabu1996@gmail.com"))
 Description: A package for analyzing Imprinting Control Regions (ICRs) DNA methylation.
     Supports both processed methylation data and raw IDAT files from Illumina arrays.
@@ -13,40 +12,19 @@ Description: A package for analyzing Imprinting Control Regions (ICRs) DNA methy
     and interactive visualizations.
 License: MIT
 Encoding: UTF-8
-LazyData: true
 LazyDataCompression: xz
 RoxygenNote: 7.3.2
-Depends:
-    R (>= 3.5.0),
-    tidyverse,
-    valr,
-    reshape2,
-    ggplot2,
-    pheatmap,
-    viridisLite,
-    ggplotify,
-    readr,
-    shiny,
-    plotly,
-    BiocManager,
-    minfi
-Imports:
-    shiny,
-    shinydashboard,
-    DT,
-    plotly,
-    minfi,
-    IlluminaHumanMethylation450kanno.ilmn12.hg19,
-    IlluminaHumanMethylationEPICanno.ilm10b4.hg19,
-    IlluminaHumanMethylationEPICv2anno.20a1.hg38,
-    readxl,
-    tools,
-    utils,
-    stats
-Suggests:
-    knitr,
-    rmarkdown,
-    testthat
+Depends: R (>= 4.4.3), tidyverse, valr, reshape2, ggplot2, pheatmap,
+        viridisLite, ggplotify, readr, shiny, plotly, BiocManager,
+        minfi
+Imports: shiny, shinydashboard, DT, plotly, minfi,
+        IlluminaHumanMethylation450kanno.ilmn12.hg19,
+        IlluminaHumanMethylationEPICanno.ilm10b4.hg19,
+        IlluminaHumanMethylationEPICv2anno.20a1.hg38, readxl, tools,
+        utils, stats
+Suggests: knitr, rmarkdown, testthat
 VignetteBuilder: knitr
-biocViews: DNAMethylation, MicroArray, Preprocessing, QualityControl,
-    DifferentialMethylation, Epigenetics, GenomicImprinting
+biocViews: DNAMethylation, Microarray, Preprocessing, QualityControl,
+        DifferentialMethylation, Epigenetics, MethylationArray
+NeedsCompilation: no
+Packaged: 2025-06-23 12:38:32 UTC; saadat

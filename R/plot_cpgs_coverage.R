@@ -51,7 +51,7 @@ plot_cpgs_coverage <- function(df_ICR_cpg, bedmeth = "v1") {
     arrange(chr, start.x) %>%
     dplyr::select(probeID.y, start.y, ICR.x, start.x, end.x) %>%
     as.data.frame() %>%
-    dplyr::count(ICR.x, sort = T) %>%
+    dplyr::count(ICR.x, sort = TRUE) %>%
     dplyr::rename("ICR" = "ICR.x",
                   "Total_cov" = "n")
 

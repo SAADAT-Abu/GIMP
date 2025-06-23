@@ -31,7 +31,7 @@ validate_idat_zip <- function(zip_file, sample_sheet_name = "samplesheet.csv") {
   if (!sample_sheet_found) {
     # Look for alternative sample sheet names
     alt_sheets <- c("SampleSheet.csv", "sample_sheet.csv", "samples.csv", "metadata.csv")
-    alt_found <- sapply(alt_sheets, function(x) any(grepl(x, zip_contents$Name, ignore.case = TRUE)))
+    alt_found <- vapply(alt_sheets, function(x) any(grepl(x, zip_contents$Name, ignore.case = TRUE)))
     
     if (any(alt_found)) {
       found_sheet <- names(alt_found)[which(alt_found)[1]]
@@ -73,15 +73,6 @@ create_sample_sheet_template <- function(sample_names = NULL,
                                        sentrix_ids = NULL, 
                                        sentrix_positions = NULL,
                                        groups = NULL) {
-  
-  # Create default template if no parameters provided
-  if (is.null(sample_names)) {
-    n_samples <- 6
-    sample_names <- paste0("Sample_", 1:n_samples)
-    sentrix_ids <- rep(c("200123456789", "200123456790"), each = 3)
-    sentrix_positions <- rep(c("R01C01", "R02C01", "R03C01"), 2)
-    groups <- rep(c("Control", "Case"), each = 3)
-  }
   
   # Validate input lengths
   if (!is.null(sentrix_ids) && length(sentrix_ids) != length(sample_names)) {

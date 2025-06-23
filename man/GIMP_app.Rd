@@ -30,12 +30,10 @@ The GIMP Shiny app includes the following features:
 }
 }
 \examples{
-\dontrun{
 # Launch the GIMP Shiny app
 GIMP_app()
 
 # Launch with larger upload limit
 GIMP_app(max_upload_size_mb = 1000)
-}
 
 }

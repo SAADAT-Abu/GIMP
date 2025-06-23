@@ -7,7 +7,7 @@
 #' @param ICRcpg A data frame or matrix containing CpG methylation data. Includes CpG coordinates (`cstart`) and methylation values.
 #' @param ICR A character string specifying the name of the ICR region to be plotted.
 #' @param sampleInfo A character vector providing group labels (e.g., `"Control"` or `"Case"`) for each sample in the methylation data.
-#' @param interactive A logical value indicating whether to return an interactive `plotly` plot (`TRUE`) or a static `ggplot2` plot (`FALSE`). Default is `TRUE`.
+#' @param interactive A logical value indimessageing whether to return an interactive `plotly` plot (`TRUE`) or a static `ggplot2` plot (`FALSE`). Default is `TRUE`.
 #' @return A plot representing the line plot of methylation values across the specified ICR region, highlighting significant DMPs. 
 #' The plot is either a `ggplot2` object or a `plotly` object, depending on the value of `interactive`.
 #' @examples
@@ -16,15 +16,6 @@
 #' print(plot)
 #' @export
 plot_line_ICR <- function(significantDMPs, ICRcpg, ICR, sampleInfo, interactive = TRUE) {
-  
-  if (interactive) {
-    if (!requireNamespace("plotly", quietly = TRUE)) {
-      warning("plotly package not available. Falling back to static plot.")
-      interactive <- FALSE
-    } else {
-      library(plotly)
-    }
-  }
   
   # Input validation
   if (!is.data.frame(significantDMPs) || nrow(significantDMPs) == 0) {
@@ -46,13 +37,13 @@ plot_line_ICR <- function(significantDMPs, ICRcpg, ICR, sampleInfo, interactive 
     stop("No significant DMPs found for the specified ICR.")
   }
   
-  cat("Debug: Found", nrow(regionDMPs), "DMPs for ICR", ICR, "\n")
+  message("Found", nrow(regionDMPs), "DMPs for ICR", ICR, "\n")
   
   # Get region boundaries
   regionStart <- min(regionDMPs$start, na.rm = TRUE)
   regionEnd <- max(regionDMPs$end, na.rm = TRUE)
   
-  cat("Debug: Region boundaries:", regionStart, "to", regionEnd, "\n")
+  message("Region boundaries:", regionStart, "to", regionEnd, "\n")
   
   # Filter CpGs for the specified ICR region
   # First, check if ICRcpg has the required columns
@@ -69,7 +60,7 @@ plot_line_ICR <- function(significantDMPs, ICRcpg, ICR, sampleInfo, interactive 
     stop(paste("No CpGs found for ICR", ICR, "in ICRcpg data."))
   }
   
-  cat("Debug: Found", nrow(regionCpGs), "CpGs for ICR", ICR, "\n")
+  message("Found", nrow(regionCpGs), "CpGs for ICR", ICR, "\n")
   
   # Identify methylation data columns (all except the last 4 annotation columns)
   annotation_cols <- c("cstart", "ICR", "start", "end")
@@ -98,7 +89,7 @@ plot_line_ICR <- function(significantDMPs, ICRcpg, ICR, sampleInfo, interactive 
   methylationData <- methylationData[valid_rows, , drop = FALSE]
   annotationData <- annotationData[valid_rows, , drop = FALSE]
   
-  cat("Debug: After filtering, have", nrow(methylationData), "valid CpGs\n")
+  message("After filtering, have", nrow(methylationData), "valid CpGs\n")
   
   # Prepare data for plotting
   methylationData$cstart <- annotationData$cstart
@@ -126,7 +117,7 @@ plot_line_ICR <- function(significantDMPs, ICRcpg, ICR, sampleInfo, interactive 
     stop("No valid data points for plotting after removing NAs.")
   }
   
-  cat("Debug: Final data for plotting has", nrow(methylationDataLong), "points\n")
+  message("Final data for plotting has", nrow(methylationDataLong), "points\n")
   
   # Create the plot
   tryCatch({

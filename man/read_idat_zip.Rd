@@ -44,12 +44,10 @@ This function extracts and processes IDAT files from a ZIP archive containing
 IDAT files and a sample sheet, returning a beta value matrix ready for GIMP analysis.
 }
 \examples{
-\dontrun{
 # Read IDAT files from ZIP
 idat_data <- read_idat_zip("my_methylation_data.zip", array_type = "EPIC")
 beta_matrix <- idat_data$beta_matrix
 
 # Use with GIMP functions
 ICRcpg <- make_cpgs(Bmatrix = beta_matrix, bedmeth = "v1")
-}
 }

@@ -17,14 +17,12 @@
 #' \item{failed_samples}{Names of samples that failed QC}
 #' 
 #' @examples
-#' \dontrun{
 #' # Read IDAT files from ZIP
 #' idat_data <- read_idat_zip("my_methylation_data.zip", array_type = "EPIC")
 #' beta_matrix <- idat_data$beta_matrix
 #' 
 #' # Use with GIMP functions
 #' ICRcpg <- make_cpgs(Bmatrix = beta_matrix, bedmeth = "v1")
-#' }
 #' @export
 read_idat_zip <- function(zip_file, 
                           sample_sheet_name = "samplesheet.csv",
@@ -71,12 +69,12 @@ read_idat_zip <- function(zip_file,
   original_sample_count <- 0
   
   tryCatch({
-    cat("=== IDAT PROCESSING STARTED ===\n")
-    cat("Extracting ZIP file to:", extract_dir, "\n")
+    message("=== IDAT PROCESSING STARTED ===\n")
+    message("Extracting ZIP file to:", extract_dir, "\n")
     
     # Extract ZIP file
     extracted_files <- unzip(zip_file, exdir = extract_dir)
-    cat("Extracted", length(extracted_files), "files\n")
+    message("Extracted", length(extracted_files), "files\n")
     
     # Find sample sheet
     sample_sheet_path <- file.path(extract_dir, sample_sheet_name)
@@ -101,7 +99,7 @@ read_idat_zip <- function(zip_file,
         csv_files <- list.files(extract_dir, pattern = "\\.csv$", full.names = TRUE, recursive = TRUE)
         if (length(csv_files) > 0) {
           sample_sheet_path <- csv_files[1]
-          cat("Using first CSV file found as sample sheet:", basename(sample_sheet_path), "\n")
+          message("Using first CSV file found as sample sheet:", basename(sample_sheet_path), "\n")
         } else {
           stop("No sample sheet found. Expected: ", sample_sheet_name, 
                " or one of: SampleSheet.csv, sample_sheet.csv, samples.csv")
@@ -110,12 +108,12 @@ read_idat_zip <- function(zip_file,
     }
     
     # Read sample sheet
-    cat("Reading sample sheet from:", sample_sheet_path, "\n")
+    message("Reading sample sheet from:", sample_sheet_path, "\n")
     sample_sheet <- read.csv(sample_sheet_path, stringsAsFactors = FALSE)
     original_sample_count <- nrow(sample_sheet)
     
-    cat("Sample sheet dimensions:", nrow(sample_sheet), "rows,", ncol(sample_sheet), "columns\n")
-    cat("Sample sheet columns:", paste(colnames(sample_sheet), collapse = ", "), "\n")
+    message("Sample sheet dimensions:", nrow(sample_sheet), "rows,", ncol(sample_sheet), "columns\n")
+    message("Sample sheet columns:", paste(colnames(sample_sheet), collapse = ", "), "\n")
     
     # Validate sample sheet columns
     required_cols <- c("Sample_Name", "Sentrix_ID", "Sentrix_Position")
@@ -135,7 +133,7 @@ read_idat_zip <- function(zip_file,
           if (alt %in% colnames(sample_sheet)) {
             colnames(sample_sheet)[colnames(sample_sheet) == alt] <- col
             found <- TRUE
-            cat("Mapped column", alt, "to", col, "\n")
+            message("Mapped column", alt, "to", col, "\n")
             break
           }
         }
@@ -160,11 +158,11 @@ read_idat_zip <- function(zip_file,
       !is.na(sample_sheet$Sentrix_Position) & 
       sample_sheet$Sentrix_Position != ""
     
-    cat("Valid rows before filtering:", sum(valid_rows), "out of", length(valid_rows), "\n")
+    message("Valid rows before filtering:", sum(valid_rows), "out of", length(valid_rows), "\n")
     
     sample_sheet <- sample_sheet[valid_rows, , drop = FALSE]
     
-    cat("Valid samples in sheet after filtering:", nrow(sample_sheet), "\n")
+    message("Valid samples in sheet after filtering:", nrow(sample_sheet), "\n")
     
     if (nrow(sample_sheet) == 0) {
       stop("No valid samples found in sample sheet after filtering")
@@ -177,16 +175,16 @@ read_idat_zip <- function(zip_file,
       stop("No IDAT files found in the ZIP archive")
     }
     
-    cat("Found", length(all_idat_files), "IDAT files in ZIP\n")
+    message("Found", length(all_idat_files), "IDAT files in ZIP\n")
     
     # Print some example IDAT file names for debugging
     idat_basenames <- unique(gsub("_(Red|Grn)\\.idat$", "", basename(all_idat_files)))
-    cat("Example IDAT identifiers (first 5):\n")
-    cat(paste(head(idat_basenames, 5), collapse = "\n"), "\n")
-    cat("Total unique IDAT basenames:", length(idat_basenames), "\n")
+    message("Example IDAT identifiers (first 5):\n")
+    message(paste(head(idat_basenames, 5), collapse = "\n"), "\n")
+    message("Total unique IDAT basenames:", length(idat_basenames), "\n")
     
     # Create Basename column for minfi - try multiple strategies
-    cat("Attempting to match IDAT files with sample sheet entries...\n")
+    message("Attempting to match IDAT files with sample sheet entries...\n")
     
     # Strategy 1: Standard format (Sentrix_ID_Sentrix_Position)
     sample_sheet$Basename <- file.path(dirname(all_idat_files[1]), 
@@ -197,10 +195,10 @@ read_idat_zip <- function(zip_file,
     idat_files_grn <- paste0(sample_sheet$Basename, "_Grn.idat")
     missing_files <- !(file.exists(idat_files_red) & file.exists(idat_files_grn))
     
-    cat("Standard matching: ", sum(!missing_files), "out of", length(missing_files), "samples matched\n")
+    message("Standard matching: ", sum(!missing_files), "out of", length(missing_files), "samples matched\n")
     
     if (any(missing_files)) {
-      cat("Trying flexible matching for", sum(missing_files), "unmatched samples...\n")
+      message("Trying flexible matching for", sum(missing_files), "unmatched samples...\n")
       
       # Strategy 2: Flexible matching
       for (i in which(missing_files)) {
@@ -220,7 +218,7 @@ read_idat_zip <- function(zip_file,
             # Found unique match
             sample_sheet$Basename[i] <- file.path(dirname(all_idat_files[1]), matching_files[1])
             found_match <- TRUE
-            cat("  Matched sample", sample_sheet$Sample_Name[i], "with pattern:", matching_files[1], "\n")
+            message("  Matched sample", sample_sheet$Sample_Name[i], "with pattern:", matching_files[1], "\n")
             break
           } else if (length(matching_files) > 1) {
             # Multiple matches - try to find exact match
@@ -228,7 +226,7 @@ read_idat_zip <- function(zip_file,
             if (length(exact_match) == 1) {
               sample_sheet$Basename[i] <- file.path(dirname(all_idat_files[1]), exact_match[1])
               found_match <- TRUE
-              cat("  Matched sample", sample_sheet$Sample_Name[i], "with exact pattern:", exact_match[1], "\n")
+              message("  Matched sample", sample_sheet$Sample_Name[i], "with exact pattern:", exact_match[1], "\n")
               break
             }
           }
@@ -249,19 +247,20 @@ read_idat_zip <- function(zip_file,
     if (any(final_missing_files)) {
       missing_samples <- sample_sheet$Sample_Name[final_missing_files]
       
-      cat("\n❌ FINAL IDAT FILE MATCHING FAILED\n")
-      cat("==================================\n")
-      cat("Could not find IDAT files for", length(missing_samples), "samples:\n")
+      warning("\n❌ FINAL IDAT FILE MATCHING FAILED\n")
+      warning("==================================\n")
+      warning("Could not find IDAT files for", length(missing_samples), "samples:\n")
       
-      for (i in which(final_missing_files)[1:min(5, length(which(final_missing_files)))]) {
-        cat("\nSample:", sample_sheet$Sample_Name[i], "\n")
-        cat("  Expected pattern:", basename(sample_sheet$Basename[i]), "\n")
-        cat("  Looking for Red:", basename(paste0(sample_sheet$Basename[i], "_Red.idat")), "\n")
-        cat("  Looking for Grn:", basename(paste0(sample_sheet$Basename[i], "_Grn.idat")), "\n")
+      missing_idx <- which(final_missing_files)
+      for (i in head(missing_idx, 5)) {
+        warning("\nSample:", sample_sheet$Sample_Name[i], "\n")
+        warning("  Expected pattern:", basename(sample_sheet$Basename[i]), "\n")
+        warning("  Looking for Red:", basename(paste0(sample_sheet$Basename[i], "_Red.idat")), "\n")
+        warning("  Looking for Grn:", basename(paste0(sample_sheet$Basename[i], "_Grn.idat")), "\n")
       }
       
       if (length(missing_samples) > 5) {
-        cat("... and", length(missing_samples) - 5, "more samples\n")
+        warning("... and", length(missing_samples) - 5, "more samples\n")
       }
       
       cat("\nAvailable IDAT patterns (first 10):\n")
@@ -275,26 +274,26 @@ read_idat_zip <- function(zip_file,
     valid_sample_indices <- !final_missing_files
     sample_sheet_filtered <- sample_sheet[valid_sample_indices, , drop = FALSE]
     
-    cat("Processing", nrow(sample_sheet_filtered), "samples with valid IDAT files\n")
+    message("Processing", nrow(sample_sheet_filtered), "samples with valid IDAT files\n")
     
     if (nrow(sample_sheet_filtered) == 0) {
       stop("No samples with valid IDAT files found")
     }
     
     # Read methylation data with minfi
-    cat("Reading methylation data with minfi...\n")
-    cat("Sample sheet for minfi has", nrow(sample_sheet_filtered), "rows\n")
+    message("Reading methylation data with minfi...\n")
+    message("Sample sheet for minfi has", nrow(sample_sheet_filtered), "rows\n")
     
     # Ensure rownames are set properly for minfi
     rownames(sample_sheet_filtered) <- sample_sheet_filtered$Sample_Name
     
     rgSet <- read.metharray.exp(targets = sample_sheet_filtered, verbose = TRUE)
     
-    cat("RGChannelSet dimensions:", dim(rgSet), "\n")
-    cat("RGChannelSet sample names:", paste(head(colnames(rgSet)), collapse = ", "), "\n")
+    message("RGChannelSet dimensions:", dim(rgSet), "\n")
+    message("RGChannelSet sample names:", paste(head(colnames(rgSet)), collapse = ", "), "\n")
     
     # Quality control with proper dimension handling
-    cat("Performing quality control...\n")
+    message("Performing quality control...\n")
     
     # Initialize QC variables
     detP <- NULL
@@ -306,9 +305,9 @@ read_idat_zip <- function(zip_file,
       # Try different detection functions
       if (exists("detectionP", envir = asNamespace("minfi"))) {
         detP <- detectionP(rgSet)
-        cat("  Using detectionP function\n")
+        message("  Using detectionP function\n")
       } else {
-        cat("  detectionP function not available, using simplified QC\n")
+        warning("  detectionP function not available, using simplified QC\n")
         # Use signal intensity as proxy for quality
         if (exists("getGreen", envir = asNamespace("minfi")) && exists("getRed", envir = asNamespace("minfi"))) {
           green_intensities <- getGreen(rgSet)
@@ -323,25 +322,25 @@ read_idat_zip <- function(zip_file,
           low_intensity_samples <- (green_medians < low_intensity_threshold) | (red_medians < low_intensity_threshold)
           failed_per_sample[low_intensity_samples] <- 0.15
           
-          cat("  Identified", sum(low_intensity_samples), "samples with low signal intensity\n")
+          message("  Identified", sum(low_intensity_samples), "samples with low signal intensity\n")
         }
       }
     }, error = function(e) {
-      cat("  Warning: Could not perform detailed QC:", e$message, "\n")
+      warning("  Warning: Could not perform detailed QC:", e$message, "\n")
     })
     
     # Calculate failed probe proportions if we have detection p-values
     if (!is.null(detP)) {
-      cat("  Calculating failed probe proportions...\n")
-      cat("  Detection p-value matrix dimensions:", dim(detP), "\n")
-      cat("  RGChannelSet dimensions:", dim(rgSet), "\n")
+      message("  Calculating failed probe proportions...\n")
+      message("  Detection p-value matrix dimensions:", dim(detP), "\n")
+      message("  RGChannelSet dimensions:", dim(rgSet), "\n")
       
       # Ensure dimensions match
       if (ncol(detP) == ncol(rgSet)) {
         failed_per_sample <- colMeans(detP > detection_pval, na.rm = TRUE)
         names(failed_per_sample) <- colnames(rgSet)
       } else {
-        cat("  Warning: Dimension mismatch between detP and rgSet\n")
+        warning("  Warning: Dimension mismatch between detP and rgSet\n")
       }
     }
     
@@ -349,18 +348,18 @@ read_idat_zip <- function(zip_file,
     failed_samples <- names(failed_per_sample)[failed_per_sample > 0.1]
     
     if (length(failed_samples) > 0) {
-      cat("Samples with potential quality issues:", length(failed_samples), "\n")
-      cat("Failed samples:", paste(head(failed_samples, 5), collapse = ", "), 
+      warning("Samples with potential quality issues:", length(failed_samples), "\n")
+      warning("Failed samples:", paste(head(failed_samples, 5), collapse = ", "), 
           if(length(failed_samples) > 5) "..." else "", "\n")
       
       if (remove_failed_samples && length(failed_samples) < ncol(rgSet)) {
-        cat("Removing", length(failed_samples), "potentially problematic samples\n")
+        warning("Removing", length(failed_samples), "potentially problematic samples\n")
         
         # Get indices of samples to keep
         keep_sample_names <- setdiff(colnames(rgSet), failed_samples)
         keep_indices <- colnames(rgSet) %in% keep_sample_names
         
-        cat("Keeping", sum(keep_indices), "samples out of", ncol(rgSet), "\n")
+        message("Keeping", sum(keep_indices), "samples out of", ncol(rgSet), "\n")
         
         # Filter rgSet
         rgSet <- rgSet[, keep_indices]
@@ -373,12 +372,12 @@ read_idat_zip <- function(zip_file,
         # Filter sample sheet to match
         sample_sheet_filtered <- sample_sheet_filtered[sample_sheet_filtered$Sample_Name %in% keep_sample_names, , drop = FALSE]
         
-        cat("After QC filtering: ", nrow(sample_sheet_filtered), "samples remaining\n")
+        message("After QC filtering: ", nrow(sample_sheet_filtered), "samples remaining\n")
       }
     }
     
     # Normalization
-    cat("Normalizing data using", normalize_method, "method...\n")
+    message("Normalizing data using", normalize_method, "method...\n")
     
     mSet <- switch(normalize_method,
                    "quantile" = preprocessQuantile(rgSet),
@@ -387,36 +386,36 @@ read_idat_zip <- function(zip_file,
                    "noob" = preprocessNoob(rgSet)
     )
     
-    cat("Normalized data dimensions:", dim(mSet), "\n")
+    message("Normalized data dimensions:", dim(mSet), "\n")
     
     # Get beta values
-    cat("Extracting beta values...\n")
+    message("Extracting beta values...\n")
     beta_matrix <- getBeta(mSet)
     
-    cat("Beta matrix dimensions:", dim(beta_matrix), "\n")
+    message("Beta matrix dimensions:", dim(beta_matrix), "\n")
     
     # Remove probes with high detection p-values if available
     if (!is.null(detP)) {
-      cat("Filtering probes based on detection p-values...\n")
+      message("Filtering probes based on detection p-values...\n")
       
       # Ensure dimensions match before filtering
       if (nrow(detP) == nrow(beta_matrix) && ncol(detP) == ncol(beta_matrix)) {
         failed_probes <- rowMeans(detP > detection_pval, na.rm = TRUE) > 0.1
-        cat("Removing", sum(failed_probes), "probes with high detection p-values\n")
+        warning("Removing", sum(failed_probes), "probes with high detection p-values\n")
         beta_matrix <- beta_matrix[!failed_probes, , drop = FALSE]
       } else {
-        cat("Dimension mismatch - skipping probe filtering\n")
+        message("Dimension mismatch - skipping probe filtering\n")
       }
     } else {
       # Alternative probe filtering
-      cat("Filtering probes based on variance...\n")
+      message("Filtering probes based on variance...\n")
       probe_vars <- apply(beta_matrix, 1, var, na.rm = TRUE)
       low_var_probes <- is.na(probe_vars) | probe_vars < 0.001
-      cat("Removing", sum(low_var_probes), "probes with low variance\n")
+      warning("Removing", sum(low_var_probes), "probes with low variance\n")
       beta_matrix <- beta_matrix[!low_var_probes, , drop = FALSE]
     }
     
-    cat("Final beta matrix dimensions:", dim(beta_matrix), "\n")
+    message("Final beta matrix dimensions:", dim(beta_matrix), "\n")
     
     # Ensure column names match sample names
     colnames(beta_matrix) <- sample_sheet_filtered$Sample_Name
@@ -446,8 +445,8 @@ read_idat_zip <- function(zip_file,
       detection_qc_available = !is.null(detP)
     )
     
-    cat("✅ Successfully processed", ncol(beta_matrix), "samples and", nrow(beta_matrix), "probes\n")
-    cat("=== IDAT PROCESSING COMPLETED ===\n")
+    message("✅ Successfully processed", ncol(beta_matrix), "samples and", nrow(beta_matrix), "probes\n")
+    message("=== IDAT PROCESSING COMPLETED ===\n")
     
     # Cleanup
     if (cleanup_temp && dir.exists(extract_dir)) {
@@ -469,30 +468,30 @@ read_idat_zip <- function(zip_file,
     }
     
     # Detailed error information
-    cat("\n=== ERROR DEBUGGING INFO ===\n")
-    cat("Error message:", e$message, "\n")
-    cat("Original sample count:", original_sample_count, "\n")
+    message("\n=== ERROR DEBUGGING INFO ===\n")
+    message("Error message:", e$message, "\n")
+    message("Original sample count:", original_sample_count, "\n")
     
     if (!is.null(sample_sheet)) {
-      cat("Sample sheet loaded: YES (", nrow(sample_sheet), "rows )\n")
-      cat("Sample sheet columns:", paste(colnames(sample_sheet), collapse = ", "), "\n")
+      message("Sample sheet loaded: YES (", nrow(sample_sheet), "rows )\n")
+      message("Sample sheet columns:", paste(colnames(sample_sheet), collapse = ", "), "\n")
     } else {
-      cat("Sample sheet loaded: NO\n")
+      message("Sample sheet loaded: NO\n")
     }
     
     if (exists("rgSet") && !is.null(rgSet)) {
-      cat("RGChannelSet created: YES (", paste(dim(rgSet), collapse = "x"), ")\n")
+      message("RGChannelSet created: YES (", paste(dim(rgSet), collapse = "x"), ")\n")
     } else {
-      cat("RGChannelSet created: NO\n")
+      message("RGChannelSet created: NO\n")
     }
     
     if (exists("all_idat_files")) {
-      cat("IDAT files found:", length(all_idat_files), "\n")
+      message("IDAT files found:", length(all_idat_files), "\n")
     } else {
-      cat("IDAT files found: NO\n")
+      message("IDAT files found: NO\n")
     }
     
-    cat("==========================\n")
+    message("==========================\n")
     
     stop("Error processing IDAT files: ", e$message)
   })

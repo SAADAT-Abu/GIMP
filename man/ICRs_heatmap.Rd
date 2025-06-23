@@ -19,7 +19,7 @@ ICRs_heatmap(
 \arguments{
 \item{df_ICR}{A data frame or matrix containing methylation beta values for ICRs.}
 
-\item{sampleInfo}{A vector indicating the group labels (e.g., "Control" and "Case") for each sample in `df_ICR`.
+\item{sampleInfo}{A vector indimessageing the group labels (e.g., "Control" and "Case") for each sample in `df_ICR`.
 Each element in `sampleInfo` should correspond to a sample in `df_ICR`.}
 
 \item{control_label}{A character string specifying the label for the control group in `sampleInfo`. Default is `"Control"`.}

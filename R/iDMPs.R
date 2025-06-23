@@ -13,11 +13,9 @@
 #'   \item{allResults}{Data frame of all results}
 #'   \item{groupLabels}{Group labels used in analysis}
 #' @examples
-#' \dontrun{
 #' # Run DMP analysis
 #' dmps <- iDMPs(data = ICRcpg, sampleInfo = sample_groups)
 #' significant_dmps <- dmps$topDMPs
-#' }
 #' @export
 iDMPs <- function(data, sampleInfo, pValueCutoff = 0.05) {
   

@@ -6,55 +6,50 @@
 #' @return Character vector of all available minfi functions
 #' @export
 check_minfi_functions <- function() {
-  if (!requireNamespace("minfi", quietly = TRUE)) {
-    stop("minfi package not installed")
-  }
   
-  library(minfi)
-  
-  cat("minfi Package Information\n")
-  cat("========================\n")
-  cat("Version:", as.character(packageVersion("minfi")), "\n\n")
+  message("minfi Package Information\n")
+  message("========================\n")
+  message("Version:", as.character(packageVersion("minfi")), "\n\n")
   
   # Get all functions
   all_functions <- ls(envir = asNamespace("minfi"))
   
   # Look for detection-related functions
-  cat("Detection-related functions:\n")
+  message("Detection-related functions:\n")
   detection_funcs <- grep("etection|etP", all_functions, value = TRUE, ignore.case = TRUE)
   if (length(detection_funcs) > 0) {
     for (func in detection_funcs) {
-      cat("  -", func, "\n")
+      message("  -", func, "\n")
     }
   } else {
-    cat("  No detection functions found\n")
+    message("  No detection functions found\n")
   }
   
   # Look for preprocessing functions
-  cat("\nPreprocessing functions:\n")
+  message("\nPreprocessing functions:\n")
   preprocess_funcs <- grep("preprocess", all_functions, value = TRUE, ignore.case = TRUE)
   for (func in head(preprocess_funcs, 10)) {
-    cat("  -", func, "\n")
+    message("  -", func, "\n")
   }
   
   # Look for get functions
-  cat("\nGetter functions:\n")
+  message("\nGetter functions:\n")
   get_funcs <- grep("^get", all_functions, value = TRUE, ignore.case = TRUE)
   for (func in head(get_funcs, 10)) {
-    cat("  -", func, "\n")
+    message("  -", func, "\n")
   }
   
   # Test specific functions we need
-  cat("\nTesting required functions:\n")
+  message("\nTesting required functions:\n")
   
   required_funcs <- c("read.metharray.exp", "getBeta", "getDetectionP", "detectionP", 
                       "preprocessQuantile", "preprocessSWAN", "preprocessFunnorm", "preprocessNoob")
   
   for (func in required_funcs) {
     if (exists(func, envir = asNamespace("minfi"))) {
-      cat("  ✅", func, "- available\n")
+      message("  ✅", func, "- available\n")
     } else {
-      cat("  ❌", func, "- NOT available\n")
+      message("  ❌", func, "- NOT available\n")
     }
   }
   
@@ -84,7 +79,7 @@ calculate_detection_pvalues <- function(rgSet) {
       return(detectionP(rgSet))
     }
   }, error = function(e) {
-    cat("Method 1 failed:", e$message, "\n")
+    message("Method 1 failed:", e$message, "\n")
   })
   
   tryCatch({
@@ -93,12 +88,12 @@ calculate_detection_pvalues <- function(rgSet) {
       return(getDetectionP(rgSet))
     }
   }, error = function(e) {
-    cat("Method 2 failed:", e$message, "\n")
+    message("Method 2 failed:", e$message, "\n")
   })
   
   tryCatch({
     # Method 3: Manual calculation
-    cat("Attempting manual detection p-value calculation...\n")
+    message("Attempting manual detection p-value calculation...\n")
     
     # Get control probes
     if (exists("getProbeInfo", envir = asNamespace("minfi"))) {
@@ -125,14 +120,14 @@ calculate_detection_pvalues <- function(rgSet) {
         detection_matrix[low_green | low_red, i] <- 0.1  # High p-value = failed
       }
       
-      cat("Manual detection p-values calculated (simplified approach)\n")
+      message("Manual detection p-values calculated (simplified approach)\n")
       return(detection_matrix)
     }
   }, error = function(e) {
-    cat("Method 3 failed:", e$message, "\n")
+    message("Method 3 failed:", e$message, "\n")
   })
   
   # If all methods fail, return NULL
-  cat("All detection p-value methods failed. Proceeding without detection QC.\n")
+  message("All detection p-value methods failed. Proceeding without detection QC.\n")
   return(NULL)
 }

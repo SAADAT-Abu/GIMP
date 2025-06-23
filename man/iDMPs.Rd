@@ -26,9 +26,7 @@ This function identifies differentially methylated positions (DMPs) between
 control and case groups using linear modeling and empirical Bayes methods.
 }
 \examples{
-\dontrun{
 # Run DMP analysis
 dmps <- iDMPs(data = ICRcpg, sampleInfo = sample_groups)
 significant_dmps <- dmps$topDMPs
-}
 }

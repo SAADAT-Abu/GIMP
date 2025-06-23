@@ -3,7 +3,7 @@
 #' This function generates a heatmap for visualizing methylation data of ICRs.
 #'
 #' @param df_ICR A data frame or matrix containing methylation beta values for ICRs.
-#' @param sampleInfo A vector indicating the group labels (e.g., "Control" and "Case") for each sample in `df_ICR`.
+#' @param sampleInfo A vector indimessageing the group labels (e.g., "Control" and "Case") for each sample in `df_ICR`.
 #' Each element in `sampleInfo` should correspond to a sample in `df_ICR`.
 #' @param control_label A character string specifying the label for the control group in `sampleInfo`. Default is `"Control"`.
 #' @param case_label A character string specifying the label for the case group in `sampleInfo`. Default is `"Case"`.
@@ -25,12 +25,12 @@
 ICRs_heatmap <- function(df_ICR, sampleInfo, control_label = "Control", case_label = "Case", bedmeth = "v1", order_by = "cord", annotation_col = NULL, plot_type = "beta", sd_threshold = 3) {
   
   # Debug info
-  cat("ICRs_heatmap Debug Info:\n")
-  cat("df_ICR dimensions:", dim(df_ICR), "\n")
-  cat("sampleInfo length:", length(sampleInfo), "\n")
-  cat("sampleInfo values:", paste(sampleInfo, collapse = ", "), "\n")
-  cat("bedmeth:", bedmeth, "\n")
-  cat("plot_type:", plot_type, "\n")
+  message("ICRs_heatmap Debug Info:\n")
+  message("df_ICR dimensions:", dim(df_ICR), "\n")
+  message("sampleInfo length:", length(sampleInfo), "\n")
+  message("sampleInfo values:", paste(sampleInfo, collapse = ", "), "\n")
+  message("bedmeth:", bedmeth, "\n")
+  message("plot_type:", plot_type, "\n")
   
   # Check if df_ICR is empty
   if (nrow(df_ICR) == 0 || ncol(df_ICR) == 0) {

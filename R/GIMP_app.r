@@ -23,13 +23,11 @@
 #' invisibly once the app is closed.
 #'
 #' @examples
-#' \dontrun{
 #' # Launch the GIMP Shiny app
 #' GIMP_app()
 #' 
 #' # Launch with larger upload limit
 #' GIMP_app(max_upload_size_mb = 1000)
-#' }
 #'
 #' @export
 GIMP_app <- function(max_upload_size_mb = 500) {
@@ -44,14 +42,6 @@ GIMP_app <- function(max_upload_size_mb = 500) {
                paste(paste0('"', missing_packages, '"'), collapse = ", "), "))"),
          call. = FALSE)
   }
-  
-  library(shiny)
-  library(shinydashboard)
-  library(DT)
-  library(tidyverse)
-  library(plotly)
-  library(ggplot2)
-  library(reshape2)
   
   # Set upload size limit
   options(shiny.maxRequestSize = max_upload_size_mb * 1024^2)

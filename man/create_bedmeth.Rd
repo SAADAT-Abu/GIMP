@@ -7,7 +7,7 @@
 create_bedmeth(version = "v1")
 }
 \arguments{
-\item{version}{A character string specifying the annotation version to use. Options include `"v1"` for the EPIC version1 and `"v2"` for EPIC version2. Default is `"v1"`.}
+\item{version}{A character string specifying the annotation version to use. Options include `"450k"` for 450k array, `"v1"` for the EPIC version1 and `"v2"` for EPIC version2. Default is `"v1"`.}
 }
 \value{
 A data frame in BED format containing columns:
