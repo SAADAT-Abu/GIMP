@@ -37,13 +37,13 @@ plot_line_ICR <- function(significantDMPs, ICRcpg, ICR, sampleInfo, interactive 
     stop("No significant DMPs found for the specified ICR.")
   }
   
-  message("Found", nrow(regionDMPs), "DMPs for ICR", ICR, "\n")
+  message("Found ", nrow(regionDMPs), " DMPs for ICR ", ICR, "\n")
   
   # Get region boundaries
   regionStart <- min(regionDMPs$start, na.rm = TRUE)
   regionEnd <- max(regionDMPs$end, na.rm = TRUE)
   
-  message("Region boundaries:", regionStart, "to", regionEnd, "\n")
+  message("Region boundaries: ", regionStart, " to ", regionEnd, "\n")
   
   # Filter CpGs for the specified ICR region
   required_cols <- c("cstart", "ICR", "start", "end")
@@ -59,7 +59,7 @@ plot_line_ICR <- function(significantDMPs, ICRcpg, ICR, sampleInfo, interactive 
     stop("No CpGs found for ICR ", ICR, " in ICRcpg data.")
   }
   
-  message("Found", nrow(regionCpGs), "CpGs for ICR", ICR, "\n")
+  message("Found ", nrow(regionCpGs), " CpGs for ICR ", ICR, "\n")
   
   # Identify methylation data columns (all except the last 4 annotation columns)
   annotation_cols <- c("cstart", "ICR", "start", "end")
@@ -88,7 +88,7 @@ plot_line_ICR <- function(significantDMPs, ICRcpg, ICR, sampleInfo, interactive 
   methylationData <- methylationData[valid_rows, , drop = FALSE]
   annotationData <- annotationData[valid_rows, , drop = FALSE]
   
-  message("After filtering, have", nrow(methylationData), "valid CpGs\n")
+  message("After filtering, have ", nrow(methylationData), " valid CpGs\n")
   
   # Prepare data for plotting
   methylationData$cstart <- annotationData$cstart
@@ -104,7 +104,7 @@ plot_line_ICR <- function(significantDMPs, ICRcpg, ICR, sampleInfo, interactive 
   })
   
   # Add sample type information
-  methylationDataLong$Type <- rep(sampleInfo, each = nrow(methylationData))
+  methylationDataLong$SampleGroup <- sampleInfo
   
   # Mark which CpGs are DMPs
   methylationDataLong$IsDMP <- methylationDataLong$cstart %in% regionDMPs$cstart
@@ -116,7 +116,7 @@ plot_line_ICR <- function(significantDMPs, ICRcpg, ICR, sampleInfo, interactive 
     stop("No valid data points for plotting after removing NAs.")
   }
   
-  message("Final data for plotting has", nrow(methylationDataLong), "points\n")
+  message("Final data for plotting has ", nrow(methylationDataLong), " points\n")
   
   # Create the plot with DYNAMIC COLOR MAPPING
   tryCatch({
@@ -143,16 +143,13 @@ plot_line_ICR <- function(significantDMPs, ICRcpg, ICR, sampleInfo, interactive 
       case_label <- sorted_labels[2]
     }
     
-    # Create dynamic color and linetype mapping
+    # Create dynamic color mapping
     color_mapping <- c("yellow3", "purple4")
     names(color_mapping) <- c(control_label, case_label)
     
-    linetype_mapping <- c("solid", "solid")
-    names(linetype_mapping) <- c(control_label, case_label)
-    
-    # Create the plot
-    plot <- ggplot(methylationDataLong, aes(x = cstart, y = Methylation, group = sampleInfo, color = Type)) +
-      geom_line(aes(linetype = Type), alpha = 0.5, size = 0.5) +
+    # Create the plot - FIXED: moved constant aesthetics outside aes()
+    plot <- ggplot(methylationDataLong, aes(x = cstart, y = Methylation, color = SampleGroup)) +
+      geom_line(linetype = 1, alpha = 0.5, size = 0.5) +  # FIXED: removed from aes()
       geom_point(data = methylationDataLong[!methylationDataLong$IsDMP, ], 
                  size = 1, alpha = 0.7) +
       geom_point(data = methylationDataLong[methylationDataLong$IsDMP, ], 
@@ -164,12 +161,11 @@ plot_line_ICR <- function(significantDMPs, ICRcpg, ICR, sampleInfo, interactive 
       
       # DYNAMIC SCALES
       scale_color_manual("Group", values = color_mapping) +
-      scale_linetype_manual("Group", values = linetype_mapping) +
       
       labs(
         title = paste("Methylation Profile:", ICR),
         subtitle = paste("Showing", sum(methylationDataLong$IsDMP), "significant DMPs |", 
-                         control_label, "(blue) vs", case_label, "(red)"),
+                         control_label, "(Yellow) vs", case_label, "(Purple)"),
         x = "CpG Coordinates (bp)",
         y = "Methylation Value (Beta)"
       ) +
@@ -181,14 +177,12 @@ plot_line_ICR <- function(significantDMPs, ICRcpg, ICR, sampleInfo, interactive 
       ) +
       ylim(0, 1)  # Ensure y-axis shows full beta value range
     
-    # Convert to interactive plot if requested
+    # Convert to interactive plot if requested - FIXED: corrected layout syntax
     if (interactive) {
       tryCatch({
-        plot <- ggplotly(plot, tooltip = c("x", "y", "colour", "group")) %>%
-          layout(
-            title = list(text = paste("Methylation Profile:", ICR)),
-            showlegend = TRUE
-          )
+        plot <- ggplotly(plot, tooltip = c("x", "y", "colour", "group"))
+        # Apply layout modifications separately if needed
+        # Note: ggplotly usually preserves the ggplot title and legend automatically
       }, error = function(e) {
         warning("Failed to create interactive plot: ", e$message, ". Returning static plot.")
         interactive <- FALSE  # Fall back to static
