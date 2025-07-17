@@ -6,7 +6,7 @@ library(DT)
 library(plotly)
 
 ui <- dashboardPage(
-  dashboardHeader(title = "GIMP: Genomic Imprinting Methylation Patterns"),
+  dashboardHeader(title = "GIMP"),
   
   dashboardSidebar(
     sidebarMenu(
@@ -289,7 +289,7 @@ ui <- dashboardPage(
             conditionalPanel(
               condition = "output.dataLoaded",
               
-              actionButton("runCpGAnalysis", "Generate CpG Analysis", 
+              actionButton("runCpGAnalysis", "Analyse CpG Coverage",
                 class = "btn-success", 
                 icon = icon("calculator")
               ),

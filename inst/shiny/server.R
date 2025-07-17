@@ -231,8 +231,8 @@ server <- function(input, output, session) {
     tryCatch({
       # Map array type for GIMP bedmeth parameter
       bedmeth_mapping <- list(
+        "450k" = "450k",
         "EPIC" = "v1",
-        "450k" = "450k", 
         "EPICv2" = "v2"
       )
       
@@ -326,8 +326,8 @@ server <- function(input, output, session) {
     tryCatch({
       # Map IDAT array type to GIMP bedmeth
       bedmeth_type <- switch(values$qc_metrics$array_type,
-                            "EPIC" = "v1",
                             "450k" = "450k",
+                            "EPIC" = "v1",
                             "EPICv2" = "v2")
       
       values$ICRcpg <- make_cpgs(Bmatrix = values$betaMatrix, bedmeth = bedmeth_type)
@@ -571,19 +571,49 @@ server <- function(input, output, session) {
       # Determine bedmeth type
       if (!is.null(values$qc_metrics)) {
         bedmeth_type <- switch(values$qc_metrics$array_type,
-                              "EPIC" = "v1",
                               "450k" = "450k",
+                              "EPIC" = "v1",
                               "EPICv2" = "v2")
       } else {
         bedmeth_type <- input$arrayType
+      }
+
+      #Extract unique labels from sampleInfo dynamically
+      unique_labels <- unique(values$sampleInfo)
+
+      # Validate that we have exactly 2 groups
+      if (length(unique_labels) != 2) {
+        stop(paste("Expected exactly 2 groups, but found", length(unique_labels),
+                 "groups:", paste(unique_labels, collapse = ", ")))
+        }
+
+       # Determine which label should be control and which should be case
+      # Priority order: "Control" > "control" > first alphabetically
+      if ("Control" %in% unique_labels) {
+        control_label <- "Control"
+        case_label <- setdiff(unique_labels, "Control")
+      } else if ("control" %in% unique_labels) {
+        control_label <- "control"
+        case_label <- setdiff(unique_labels, "control")
+      } else {
+      # Sort alphabetically and assign first as control, second as case
+        sorted_labels <- sort(unique_labels)
+        control_label <- sorted_labels[1]
+        case_label <- sorted_labels[2]
+
+        # Notify user about the assignment
+        showNotification(
+          paste("Auto-assigned groups: Control =", control_label, ", Case =", case_label),
+          type = "message", duration = 5
+        )
       }
       
       # Generate the heatmap
       p <- ICRs_heatmap(
         df_ICR = values$df.ICR,
         sampleInfo = values$sampleInfo,
-        control_label = "Control",
-        case_label = "Case",
+        control_label = control_label,
+        case_label = case_label,
         bedmeth = bedmeth_type,
         order_by = input$orderBy,
         plot_type = input$plotType,
@@ -625,8 +655,8 @@ server <- function(input, output, session) {
         # Determine bedmeth type
         if (!is.null(values$qc_metrics)) {
           bedmeth_type <- switch(values$qc_metrics$array_type,
-                                "EPIC" = "v1",
                                 "450k" = "450k",
+                                "EPIC" = "v1",
                                 "EPICv2" = "v2")
         } else {
           bedmeth_type <- input$arrayType
@@ -636,8 +666,8 @@ server <- function(input, output, session) {
         p <- ICRs_heatmap(
           df_ICR = values$df.ICR,
           sampleInfo = values$sampleInfo,
-          control_label = "Control",
-          case_label = "Case",
+          control_label = control_label,
+          case_label = case_label,
           bedmeth = bedmeth_type,
           order_by = input$orderBy,
           plot_type = input$plotType,
@@ -723,6 +753,7 @@ server <- function(input, output, session) {
       }
       
       # Volcano plot - use all results
+
       output$volcanoPlot <- renderPlotly({
         if (nrow(values$dmps_results$allResults) > 0) {
           plot_data <- values$dmps_results$allResults
@@ -731,8 +762,9 @@ server <- function(input, output, session) {
           
           p <- ggplot(plot_data, aes(x = logFC, y = neg_log_p, color = significant, 
                                      text = paste("ICR:", ICR, "<br>",
-                                                 "logFC:", round(logFC, 3), "<br>",
-                                                 "P.Value:", format(P.Value, scientific = TRUE)))) +
+                                                  "CpGID:",rownames(plot_data), "<br>",
+                                                  "logFC:", round(logFC, 3), "<br>",
+                                                  "P.Value:", format(P.Value, scientific = TRUE)))) +
             geom_point(alpha = 0.6) +
             scale_color_manual(values = c("FALSE" = "grey", "TRUE" = "red")) +
             geom_hline(yintercept = -log10(input$pValueCutoff), linetype = "dashed") +
