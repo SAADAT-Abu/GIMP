@@ -7,7 +7,9 @@
 create_bedmeth(version = "v1")
 }
 \arguments{
-\item{version}{A character string specifying the annotation version to use. Options include `"450k"` for 450k array, `"v1"` for the EPIC version1 and `"v2"` for EPIC version2. Default is `"v1"`.}
+\item{version}{A character string specifying the annotation version to use.
+Options include `"450k"` for 450k array, `"v1"` for the EPIC version1 and `"v2"` for EPIC version2.
+Default is `"v1"`.}
 }
 \value{
 A data frame in BED format containing columns:
@@ -17,7 +19,8 @@ A data frame in BED format containing columns:
   \item{end}{End position, which is the same as `pos` in this output.}
 }
 \description{
-This function generates a BED-format data frame from Illumina Human Methylation annotation files. The BED data includes chromosome, position, and probe ID information, and supports multiple annotation versions.
+This function generates a BED-format data frame from Illumina Human Methylation annotation files.
+The BED data includes chromosome, position, and probe ID information, and supports multiple annotation versions.
 }
 \examples{
 # Create BED-format data with the default version (EPIC v1)

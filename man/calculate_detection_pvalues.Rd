@@ -15,3 +15,10 @@ Matrix of detection p-values or NULL if calculation fails
 \description{
 Alternative method for calculating detection p-values when standard minfi functions are not available.
 }
+\examples{
+\donttest{
+# This function requires actual IDAT data
+# rgSet <- read.metharray.exp("path/to/idat/files")
+# det_p <- calculate_detection_pvalues(rgSet)
+}
+}

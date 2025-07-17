@@ -4,6 +4,11 @@
 #' Diagnostic function to check which minfi functions are available in the current installation.
 #' 
 #' @return Character vector of all available minfi functions
+#' @examples
+#' \donttest{
+#' # Check which minfi functions are available
+#' available_funcs <- check_minfi_functions()
+#' }
 #' @export
 check_minfi_functions <- function() {
   
@@ -63,6 +68,12 @@ check_minfi_functions <- function() {
 #' 
 #' @param rgSet RGChannelSet object from minfi
 #' @return Matrix of detection p-values or NULL if calculation fails
+#' @examples
+#' \donttest{
+#' # This function requires actual IDAT data
+#' # rgSet <- read.metharray.exp("path/to/idat/files")
+#' # det_p <- calculate_detection_pvalues(rgSet)
+#' }
 #' @export
 calculate_detection_pvalues <- function(rgSet) {
   
@@ -70,13 +81,11 @@ calculate_detection_pvalues <- function(rgSet) {
     stop("minfi package required")
   }
   
-  library(minfi)
-  
   # Try different approaches
   tryCatch({
     # Method 1: Standard function
     if (exists("detectionP", envir = asNamespace("minfi"))) {
-      return(detectionP(rgSet))
+      return(minfi::detectionP(rgSet))
     }
   }, error = function(e) {
     message("Method 1 failed:", e$message, "\n")
@@ -85,7 +94,7 @@ calculate_detection_pvalues <- function(rgSet) {
   tryCatch({
     # Method 2: Alternative name
     if (exists("getDetectionP", envir = asNamespace("minfi"))) {
-      return(getDetectionP(rgSet))
+      return(minfi::getDetectionP(rgSet))
     }
   }, error = function(e) {
     message("Method 2 failed:", e$message, "\n")
@@ -101,8 +110,8 @@ calculate_detection_pvalues <- function(rgSet) {
       
       # Simple approach: use background correction as proxy for detection
       # This is a simplified version and may not be as accurate
-      green <- getGreen(rgSet)
-      red <- getRed(rgSet)
+      green <- minfi::getGreen(rgSet)
+      red <- minfi::getRed(rgSet)
       
       # Calculate background levels (very simplified)
       green_bg <- apply(green, 2, function(x) quantile(x, 0.05, na.rm = TRUE))
@@ -114,7 +123,7 @@ calculate_detection_pvalues <- function(rgSet) {
       colnames(detection_matrix) <- colnames(green)
       
       # Mark low-intensity probes as failed
-      for (i in 1:ncol(green)) {
+      for (i in seq_len(ncol(green))) {
         low_green <- green[, i] < (green_bg[i] * 2)
         low_red <- red[, i] < (red_bg[i] * 2)
         detection_matrix[low_green | low_red, i] <- 0.1  # High p-value = failed

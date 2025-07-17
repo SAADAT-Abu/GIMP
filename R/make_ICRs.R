@@ -8,7 +8,25 @@
 #' @param bedmeth A character string indicating the BED data version to use for CpG mapping. Options are `"v1"` (EPIC v1), `"v2"` (EPIC v2), or `"450k"` (450k array). Default is `"v1"`.
 #' @return A data frame representing the ICR matrix, structured by CpG probes and samples.
 #' @examples
-#' ICRmatrix <- make_ICRs(Bmatrix = df, bedmeth = "v1")
+#' \donttest{
+#' # Create sample beta matrix for demonstration
+#' set.seed(123)
+#' n_probes <- 1000
+#' n_samples <- 6
+#' 
+#' # Generate random probe IDs that might overlap with ICRs
+#' sample_probes <- paste0("cg", sprintf("%08d", sample(1:50000000, n_probes)))
+#' beta_matrix <- matrix(runif(n_probes * n_samples, 0.3, 0.8), 
+#'                       nrow = n_probes, ncol = n_samples)
+#' rownames(beta_matrix) <- sample_probes
+#' colnames(beta_matrix) <- paste0("Sample_", 1:n_samples)
+#' 
+#' # Generate the ICR matrix with default BED version (EPIC v1)
+#' ICRmatrix <- make_ICRs(Bmatrix = beta_matrix, bedmeth = "v1")
+#' }
+#' 
+#' # Simple usage with your own data:
+#' # ICRmatrix <- make_ICRs(Bmatrix = your_beta_matrix, bedmeth = "v1")
 #' @export
 
 make_ICRs <- function(Bmatrix, bedmeth = "v1") {

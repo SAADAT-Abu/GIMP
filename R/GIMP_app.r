@@ -32,14 +32,17 @@
 #' @export
 GIMP_app <- function(max_upload_size_mb = 500) {
   # Check if required packages are installed
-  required_packages <- c("shiny", "shinydashboard", "DT", "plotly","ggplot2","reshape2","tidyverse")
-  missing_packages <- required_packages[!(required_packages %in% rownames(installed.packages()))]
+  required_packages <- c("shiny", "shinydashboard", "DT", "plotly",
+                         "ggplot2", "reshape2", "tidyverse")
+  missing_packages <- required_packages[!(required_packages %in% 
+                                         rownames(installed.packages()))]
   
   if (length(missing_packages) > 0) {
     stop(paste("The following required packages are not installed:", 
                paste(missing_packages, collapse = ", "), 
                "\nPlease install them using: install.packages(c(", 
-               paste(paste0('"', missing_packages, '"'), collapse = ", "), "))"),
+               paste(paste0('"', missing_packages, '"'), collapse = ", "), 
+               "))"),
          call. = FALSE)
   }
   
@@ -56,7 +59,8 @@ GIMP_app <- function(max_upload_size_mb = 500) {
   
   # Check if app files exist
   required_files <- c("app.R", "ui.R", "server.R")
-  missing_files <- required_files[!file.exists(file.path(appDir, required_files))]
+  missing_files <- required_files[!file.exists(file.path(appDir, 
+                                                        required_files))]
   
   if (length(missing_files) > 0) {
     stop(paste("The following required app files are missing:", 

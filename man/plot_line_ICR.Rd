@@ -15,7 +15,7 @@ plot_line_ICR(significantDMPs, ICRcpg, ICR, sampleInfo, interactive = TRUE)
 
 \item{sampleInfo}{A character vector providing group labels (e.g., `"Control"` or `"Case"`) for each sample in the methylation data.}
 
-\item{interactive}{A logical value indicating whether to return an interactive `plotly` plot (`TRUE`) or a static `ggplot2` plot (`FALSE`). Default is `TRUE`.}
+\item{interactive}{A logical value indimessageing whether to return an interactive `plotly` plot (`TRUE`) or a static `ggplot2` plot (`FALSE`). Default is `TRUE`.}
 }
 \value{
 A plot representing the line plot of methylation values across the specified ICR region, highlighting significant DMPs. 

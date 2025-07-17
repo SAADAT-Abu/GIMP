@@ -67,6 +67,21 @@ validate_idat_zip <- function(zip_file, sample_sheet_name = "samplesheet.csv") {
 #' @param sentrix_positions Vector of Sentrix positions
 #' @param groups Optional vector of sample groups
 #' @return Data frame with sample sheet structure
+#' @examples
+#' # Create a basic template
+#' template <- create_sample_sheet_template(
+#'   sample_names = c("Sample1", "Sample2", "Sample3"),
+#'   sentrix_ids = c("200123456", "200123456", "200123457"),
+#'   sentrix_positions = c("R01C01", "R02C01", "R01C01"),
+#'   groups = c("Control", "Control", "Case")
+#' )
+#' print(template)
+#' 
+#' # Create template with default values (minimal input)
+#' simple_template <- create_sample_sheet_template(
+#'   sample_names = c("Ctrl_01", "Case_01")
+#' )
+#' head(simple_template)
 #' @export
 
 create_sample_sheet_template <- function(sample_names = NULL, 
@@ -86,8 +101,8 @@ create_sample_sheet_template <- function(sample_names = NULL,
   # Create template
   template <- data.frame(
     Sample_Name = sample_names,
-    Sentrix_ID = sentrix_ids %||% paste0("20012345678", 1:length(sample_names)),
-    Sentrix_Position = sentrix_positions %||% paste0("R0", ((1:length(sample_names) - 1) %% 6) + 1, "C01"),
+    Sentrix_ID = sentrix_ids %||% paste0("20012345678", seq_len(length(sample_names))),
+    Sentrix_Position = sentrix_positions %||% paste0("R0", ((seq_len(length(sample_names)) - 1) %% 6) + 1, "C01"),
     stringsAsFactors = FALSE
   )
   
@@ -98,8 +113,8 @@ create_sample_sheet_template <- function(sample_names = NULL,
   
   # Add additional useful columns
   template$Sample_Plate <- "Plate1"
-  template$Sample_Well <- paste0(LETTERS[((1:nrow(template) - 1) %/% 12) + 1], 
-                                sprintf("%02d", ((1:nrow(template) - 1) %% 12) + 1))
+  template$Sample_Well <- paste0(LETTERS[((seq_len(nrow(template)) - 1) %/% 12) + 1], 
+                                sprintf("%02d", ((seq_len(nrow(template)) - 1) %% 12) + 1))
   
   return(template)
 }
@@ -115,6 +130,12 @@ create_sample_sheet_template <- function(sample_names = NULL,
 #'
 #' @param zip_file Path to ZIP file
 #' @return List with ZIP contents summary
+#' @examples
+#' \donttest{
+#' # Preview IDAT ZIP file contents
+#' # preview_info <- preview_idat_zip("methylation_data.zip")
+#' # print(preview_info)
+#' }
 #' @export
 
 preview_idat_zip <- function(zip_file) {

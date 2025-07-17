@@ -16,3 +16,10 @@ List with ZIP contents summary
 Preview the contents of an IDAT ZIP file without processing it.
 Useful for checking file structure before full processing.
 }
+\examples{
+\donttest{
+# Preview IDAT ZIP file contents
+# preview_info <- preview_idat_zip("methylation_data.zip")
+# print(preview_info)
+}
+}

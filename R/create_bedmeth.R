@@ -1,8 +1,12 @@
 #' Create BED File Data from Methylation Array Annotations
 #'
-#' This function generates a BED-format data frame from Illumina Human Methylation annotation files. The BED data includes chromosome, position, and probe ID information, and supports multiple annotation versions.
+#' This function generates a BED-format data frame from Illumina Human Methylation annotation files.
+#' The BED data includes chromosome, position, and probe ID information, and supports multiple annotation versions.
 #'
-#' @param version A character string specifying the annotation version to use. Options include `"450k"` for 450k array, `"v1"` for the EPIC version1 and `"v2"` for EPIC version2. Default is `"v1"`.
+#' @param version A character string specifying the annotation version to use.
+#' Options include `"450k"` for 450k array, `"v1"` for the EPIC version1 and `"v2"` for EPIC version2.
+#' Default is `"v1"`.
+#'
 #' @return A data frame in BED format containing columns:
 #'   \item{chr}{Chromosome name.}
 #'   \item{pos}{Position on the chromosome.}

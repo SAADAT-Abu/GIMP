@@ -3,15 +3,28 @@
 #' This function generates a heatmap for visualizing methylation data of ICRs.
 #'
 #' @param df_ICR A data frame or matrix containing methylation beta values for ICRs.
-#' @param sampleInfo A vector indimessageing the group labels (e.g., "Control" and "Case") for each sample in `df_ICR`.
+#' @param sampleInfo A vector indicating the group labels (e.g., "Control" and "Case") 
+#'   for each sample in `df_ICR`.
 #' Each element in `sampleInfo` should correspond to a sample in `df_ICR`.
-#' @param control_label A character string specifying the label for the control group in `sampleInfo`. Default is `"Control"`.
-#' @param case_label A character string specifying the label for the case group in `sampleInfo`. Default is `"Case"`.
-#' @param bedmeth A character string specifying the BED data version for DMR coordinates. Options are `"v1"`, `"v2"`, or `"450k"`. Default is `"v1"`.
-#' @param order_by A character string specifying the ordering rows in the heatmap. Options are `"cord"` for coordinates or `"meth"` for methylation values. Default is `"cord"`.
-#' @param annotation_col A named list of colors for each unique value in `sampleInfo`. If `NULL`, default colors are assigned using the "viridis" palette. Default is `NULL`.
-#' @param plot_type A character string specifying the type of heatmap to generate. Options are `"beta"` for beta values, `"delta"` for values normalized against controls, and `"defect"` for defect matrix based on standard deviations. Default is `"beta"`.
-#' @param sd_threshold A numeric value specifying the standard deviation threshold for detecting defects in the defect matrix. Only used if `plot_type` is `"defect"`. Default is `3`.
+#' @param control_label A character string specifying the label for the control 
+#'   group in `sampleInfo`. Default is `"Control"`.
+#' @param case_label A character string specifying the label for the case 
+#'   group in `sampleInfo`. Default is `"Case"`.
+#' @param bedmeth A character string specifying the BED data version for DMR 
+#'   coordinates. Options are `"v1"`, `"v2"`, or `"450k"`. Default is `"v1"`.
+#' @param order_by A character string specifying the ordering rows in the heatmap. 
+#'   Options are `"cord"` for coordinates or `"meth"` for methylation values. 
+#'   Default is `"cord"`.
+#' @param annotation_col A named list of colors for each unique value in 
+#'   `sampleInfo`. If `NULL`, default colors are assigned using the "viridis" 
+#'   palette. Default is `NULL`.
+#' @param plot_type A character string specifying the type of heatmap to generate. 
+#'   Options are `"beta"` for beta values, `"delta"` for values normalized against 
+#'   controls, and `"defect"` for defect matrix based on standard deviations. 
+#'   Default is `"beta"`.
+#' @param sd_threshold A numeric value specifying the standard deviation threshold 
+#'   for detecting defects in the defect matrix. Only used if `plot_type` is 
+#'   `"defect"`. Default is `3`.
 #' @return A heatmap plot visualizing methylation of ICRs.
 #' @import pheatmap
 #' @import viridisLite
@@ -19,10 +32,14 @@
 #' @examples
 #' # Example sampleInfo with "Case" and "Control" labels for each sample
 #' sampleInfo <- c(rep("Case", 10), rep("Control", 10))
-#' ICRs_heatmap(df_ICR = my_ICR_data, sampleInfo = sampleInfo, annotation_col = list(Sample = c("darkgreen", "darkred")))
+#' ICRs_heatmap(df_ICR = my_ICR_data, sampleInfo = sampleInfo, 
+#'              annotation_col = list(Sample = c("darkgreen", "darkred")))
 #' @export
 
-ICRs_heatmap <- function(df_ICR, sampleInfo, control_label = "Control", case_label = "Case", bedmeth = "v1", order_by = "cord", annotation_col = NULL, plot_type = "beta", sd_threshold = 3) {
+ICRs_heatmap <- function(df_ICR, sampleInfo, control_label = "Control", 
+                         case_label = "Case", bedmeth = "v1", 
+                         order_by = "cord", annotation_col = NULL, 
+                         plot_type = "beta", sd_threshold = 3) {
   
   # Debug info
   message("ICRs_heatmap Debug Info:\n")
@@ -38,7 +55,7 @@ ICRs_heatmap <- function(df_ICR, sampleInfo, control_label = "Control", case_lab
   }
   
   
-  cls_distance = "euclidean" # setting default cluster distance
+  cls_distance <- "euclidean" # setting default cluster distance
   # Load BED data based on bedmeth version
   if (bedmeth == "v1" || bedmeth == "450k") {
     data(DMRs.hg19)
@@ -79,8 +96,10 @@ ICRs_heatmap <- function(df_ICR, sampleInfo, control_label = "Control", case_lab
     annotation_col <- list(setNames(default_colors, unique_groups))
     names(annotation_col) <- annotation_name
   } else {
-    if (!is.list(annotation_col) || length(annotation_col[[1]]) != length(unique_groups)) {
-      stop("The 'annotation_col' list must have the same number of colors as the unique values in 'sampleInfo'.")
+    if (!is.list(annotation_col) || 
+        length(annotation_col[[1]]) != length(unique_groups)) {
+      stop("The 'annotation_col' list must have the same number of colors as ", 
+           "the unique values in 'sampleInfo'.")
     }
     names(annotation_col[[1]]) <- unique_groups
   }
@@ -102,7 +121,8 @@ ICRs_heatmap <- function(df_ICR, sampleInfo, control_label = "Control", case_lab
   
   if (plot_type == "beta") {
     # Define palette and breaks for beta values
-    colorPalette <- colorRampPalette(c("#785EF0", "white", "#9a031e"))(paletteLength)
+    colorPalette <- colorRampPalette(c("#785EF0", "white", 
+                                      "#9a031e"))(paletteLength)
     breaks <- c(seq(0, 0.5, length.out = ceiling(paletteLength / 2) + 1), 
                 seq(0.500001, 1, length.out = floor(paletteLength / 2)))
     heatmap_data <- df_ICR_filtered
@@ -132,7 +152,7 @@ ICRs_heatmap <- function(df_ICR, sampleInfo, control_label = "Control", case_lab
     colorPalette <- c("white", "black")
     breaks <- NULL  # No breaks needed for binary data
     main_title <- "Defect Matrix of Imprinted DMRs"
-    cls_distance = "binary" # Updating cluster distance to binary
+    cls_distance <- "binary" # Updating cluster distance to binary
     
   } else {
     stop("Invalid plot_type. Choose from 'beta', 'delta', or 'defect'.")

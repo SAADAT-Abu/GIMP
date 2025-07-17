@@ -1,0 +1,281 @@
+---
+title: "Introduction to GIMP: Genomic Imprinting Methylation Patterns"
+author: "Francesco Cecere and Abu Saadat"
+date: "`r Sys.Date()`"
+output: 
+  rmarkdown::html_vignette:
+    toc: true
+    number_sections: true
+vignette: >
+  %\VignetteIndexEntry{Introduction to GIMP}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+# Introduction
+
+GIMP (Genomic Imprinting Methylation Patterns) is an R package for analyzing Imprinting Control Regions (ICRs) from DNA methylation array data. This package provides specialized tools for:
+
+- Processing raw IDAT files from Illumina methylation arrays
+- Extracting methylation data from Imprinting Control Regions
+- Generating specialized visualizations for imprinting analysis
+- Identifying differentially methylated positions in ICRs
+- Interactive analysis through a Shiny web application
+
+# Installation
+
+To install GIMP from GitHub:
+
+```{r install, eval=FALSE}
+# Install devtools if not already installed
+if (!requireNamespace("devtools", quietly = TRUE)) {
+  install.packages("devtools")
+}
+
+# Install GIMP
+devtools::install_github("ngsFC/GIMP")
+```
+
+```{r load-package, eval=FALSE}
+# Load the package
+library(GIMP)
+```
+
+For IDAT file processing, additional Bioconductor packages are required:
+
+```{r bioc-install, eval=FALSE}
+# Install BiocManager if not already installed
+if (!requireNamespace("BiocManager", quietly = TRUE)) {
+  install.packages("BiocManager")
+}
+
+# Install required annotation packages
+BiocManager::install(c(
+  "minfi",
+  "IlluminaHumanMethylation450kanno.ilmn12.hg19",
+  "IlluminaHumanMethylationEPICanno.ilm10b4.hg19",
+  "IlluminaHumanMethylationEPICv2anno.20a1.hg38"
+))
+```
+
+# Quick Start
+
+## Using the Shiny Application
+
+The easiest way to get started with GIMP is through the interactive Shiny application:
+
+```{r shiny-app, eval=FALSE}
+# Launch the interactive application
+GIMP_app()
+
+# For large files, increase upload limit
+GIMP_app(max_upload_size_mb = 1000)
+```
+
+## Command Line Usage
+
+### Working with Preprocessed Data
+
+If you have preprocessed methylation beta values:
+
+```{r preprocessed-example, eval=FALSE}
+# Load your beta value matrix (samples as columns, probes as rows)
+# beta_matrix <- readRDS("your_methylation_data.rds")
+
+# Extract ICR-specific CpGs
+ICRcpg <- make_cpgs(Bmatrix = beta_matrix, bedmeth = "v1")
+
+# Create ICR-level summary
+df_ICR <- make_ICRs(Bmatrix = beta_matrix, bedmeth = "v1")
+
+# Define sample groups
+sampleInfo <- c(rep("Control", 10), rep("Case", 10))
+
+# Generate heatmap
+ICRs_heatmap(df_ICR, sampleInfo = sampleInfo, plot_type = "beta")
+
+# Identify differentially methylated positions
+dmps <- iDMPs(data = ICRcpg, sampleInfo = sampleInfo)
+
+# Plot specific ICR region
+plot_line_ICR(significantDMPs = dmps$significantDMPs, 
+              ICRcpg = ICRcpg, 
+              ICR = "H19", 
+              sampleInfo = sampleInfo)
+```
+
+### Processing Raw IDAT Files
+
+For raw IDAT files stored in a ZIP archive:
+
+```{r idat-example, eval=FALSE}
+library(GIMP)
+
+# Process IDAT files from ZIP archive
+idat_data <- read_idat_zip(
+  zip_file = "methylation_data.zip",
+  array_type = "EPIC",
+  normalize_method = "quantile"
+)
+
+# Extract the beta matrix and sample information
+beta_matrix <- idat_data$beta_matrix
+sample_info <- idat_data$sample_info
+
+# Continue with standard GIMP workflow
+ICRcpg <- make_cpgs(Bmatrix = beta_matrix, bedmeth = "v1")
+df_ICR <- make_ICRs(Bmatrix = beta_matrix, bedmeth = "v1")
+
+# Use sample groups from IDAT processing
+sampleInfo <- sample_info
+
+# Generate analysis
+ICRs_heatmap(df_ICR, sampleInfo = sampleInfo)
+```
+
+# Array Type Selection
+
+GIMP supports three main Illumina array types:
+
+- **450k arrays**: Use `bedmeth = "450k"` (hg19 coordinates)
+- **EPIC v1 arrays**: Use `bedmeth = "v1"` (hg19 coordinates)
+- **EPIC v2 arrays**: Use `bedmeth = "v2"` (hg38 coordinates)
+
+Always ensure your array type matches your data!
+
+# Visualization Options
+
+## Heatmap Types
+
+GIMP provides three types of heatmaps:
+
+1. **Beta values** (`plot_type = "beta"`): Raw methylation levels
+2. **Delta values** (`plot_type = "delta"`): Difference from control mean
+3. **Defect matrix** (`plot_type = "defect"`): Binary defect detection
+
+```{r heatmap-types, eval=FALSE}
+# Beta value heatmap
+ICRs_heatmap(df_ICR, sampleInfo = sampleInfo, plot_type = "beta")
+
+# Delta value heatmap  
+ICRs_heatmap(df_ICR, sampleInfo = sampleInfo, plot_type = "delta")
+
+# Defect matrix with custom threshold
+ICRs_heatmap(df_ICR, sampleInfo = sampleInfo, plot_type = "defect", 
+             sd_threshold = 2.5)
+```
+
+## Coverage Analysis
+
+Visualize CpG coverage across ICRs:
+
+```{r coverage, eval=FALSE}
+# Plot CpG coverage
+coverage_plots <- plot_cpgs_coverage(ICRcpg, bedmeth = "v1")
+
+# View count plot
+coverage_plots$plot_counts
+
+# View percentage plot  
+coverage_plots$plot_percentage
+```
+
+# Working with IDAT Files
+
+## File Structure Requirements
+
+Your ZIP file should contain:
+
+```
+methylation_data.zip
+├── Sample1_ChipID_Position_Red.idat
+├── Sample1_ChipID_Position_Grn.idat
+├── Sample2_ChipID_Position_Red.idat
+├── Sample2_ChipID_Position_Grn.idat
+├── ...
+└── samplesheet.csv
+```
+
+## Sample Sheet Format
+
+The sample sheet must include these columns:
+
+- `Sample_Name`: Unique sample identifier
+- `Sentrix_ID`: Chip/slide ID
+- `Sentrix_Position`: Position on chip (e.g., "R01C01")
+- `Sample_Group`: Optional group assignment
+
+```{r sample-sheet, eval=FALSE}
+# Create a sample sheet template
+template <- create_sample_sheet_template(
+  sample_names = c("Control_01", "Control_02", "Case_01", "Case_02"),
+  sentrix_ids = c("200123456", "200123456", "200123457", "200123457"),
+  sentrix_positions = c("R01C01", "R02C01", "R01C01", "R02C01"),
+  groups = c("Control", "Control", "Case", "Case")
+)
+
+# Save the template
+write.csv(template, "samplesheet.csv", row.names = FALSE)
+```
+
+## Troubleshooting IDAT Issues
+
+```{r idat-diagnostics, eval=FALSE}
+# Preview ZIP contents before processing
+preview_info <- preview_idat_zip("methylation_data.zip")
+
+# Check minfi installation
+check_minfi_functions()
+
+# Validate ZIP structure
+validation <- validate_idat_zip("methylation_data.zip")
+```
+
+# Advanced Analysis
+
+## Custom Parameters
+
+```{r advanced, eval=FALSE}
+# Sensitive DMP detection
+dmps_sensitive <- iDMPs(
+  data = ICRcpg,
+  sampleInfo = sampleInfo,
+  pValueCutoff = 0.01  # More stringent
+)
+
+# Custom heatmap styling
+ICRs_heatmap(
+  df_ICR = df_ICR,
+  sampleInfo = sampleInfo,
+  plot_type = "defect",
+  sd_threshold = 2.0,  # More sensitive defect detection
+  order_by = "meth",   # Order by methylation
+  annotation_col = list(Group = c("blue", "red"))
+)
+```
+
+## Interactive Plotting
+
+```{r interactive, eval=FALSE}
+# Generate interactive line plot
+plot_line_ICR(
+  significantDMPs = dmps$significantDMPs,
+  ICRcpg = ICRcpg,
+  ICR = "MEST",
+  sampleInfo = sampleInfo,
+  interactive = TRUE  # Creates plotly interactive plot
+)
+```
+
+# Session Information
+
+```{r session-info, eval=FALSE}
+sessionInfo()
+```

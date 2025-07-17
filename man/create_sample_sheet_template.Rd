@@ -26,3 +26,19 @@ Data frame with sample sheet structure
 \description{
 Creates a template sample sheet for IDAT files to help users format their data correctly.
 }
+\examples{
+# Create a basic template
+template <- create_sample_sheet_template(
+  sample_names = c("Sample1", "Sample2", "Sample3"),
+  sentrix_ids = c("200123456", "200123456", "200123457"),
+  sentrix_positions = c("R01C01", "R02C01", "R01C01"),
+  groups = c("Control", "Control", "Case")
+)
+print(template)
+
+# Create template with default values (minimal input)
+simple_template <- create_sample_sheet_template(
+  sample_names = c("Ctrl_01", "Case_01")
+)
+head(simple_template)
+}

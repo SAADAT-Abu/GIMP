@@ -32,13 +32,10 @@ read_idat_zip <- function(zip_file,
                           detection_pval = 0.01,
                           remove_failed_samples = TRUE) {
   
-  # Check and load required packages
+  # Check required packages
   if (!requireNamespace("minfi", quietly = TRUE)) {
     stop("minfi package is required. Install with: BiocManager::install('minfi')")
   }
-  
-  # Load minfi
-  library(minfi)
   
   # Validate inputs
   array_type <- match.arg(array_type)
@@ -88,7 +85,7 @@ read_idat_zip <- function(zip_file,
         alt_path <- file.path(extract_dir, sheet)
         if (file.exists(alt_path)) {
           sample_sheet_path <- alt_path
-          cat("Using sample sheet:", sheet, "\n")
+          message("Using sample sheet: ", sheet)
           found_sheet <- TRUE
           break
         }
@@ -233,8 +230,8 @@ read_idat_zip <- function(zip_file,
         }
         
         if (!found_match) {
-          cat("  ⚠️  No match found for sample:", sample_sheet$Sample_Name[i], 
-              "(", sample_sheet$Sentrix_ID[i], "_", sample_sheet$Sentrix_Position[i], ")\n")
+          message("  ⚠️  No match found for sample: ", sample_sheet$Sample_Name[i], 
+                  " (", sample_sheet$Sentrix_ID[i], "_", sample_sheet$Sentrix_Position[i], ")")
         }
       }
     }
@@ -255,16 +252,16 @@ read_idat_zip <- function(zip_file,
       for (i in head(missing_idx, 5)) {
         warning("\nSample:", sample_sheet$Sample_Name[i], "\n")
         warning("  Expected pattern:", basename(sample_sheet$Basename[i]), "\n")
-        warning("  Looking for Red:", basename(paste0(sample_sheet$Basename[i], "_Red.idat")), "\n")
-        warning("  Looking for Grn:", basename(paste0(sample_sheet$Basename[i], "_Grn.idat")), "\n")
+        warning("  Looking for Red: ", basename(sample_sheet$Basename[i]), "_Red.idat")
+        warning("  Looking for Grn: ", basename(sample_sheet$Basename[i]), "_Grn.idat")
       }
       
       if (length(missing_samples) > 5) {
         warning("... and", length(missing_samples) - 5, "more samples\n")
       }
       
-      cat("\nAvailable IDAT patterns (first 10):\n")
-      cat(paste(head(idat_basenames, 10), collapse = "\n"), "\n")
+      message("\nAvailable IDAT patterns (first 10):")
+      message(paste(head(idat_basenames, 10), collapse = "\n"))
       
       stop("Missing IDAT files for samples: ", paste(head(missing_samples, 10), collapse = ", "),
            if(length(missing_samples) > 10) paste(" ... and", length(missing_samples) - 10, "more") else "")
@@ -287,7 +284,7 @@ read_idat_zip <- function(zip_file,
     # Ensure rownames are set properly for minfi
     rownames(sample_sheet_filtered) <- sample_sheet_filtered$Sample_Name
     
-    rgSet <- read.metharray.exp(targets = sample_sheet_filtered, verbose = TRUE)
+    rgSet <- minfi::read.metharray.exp(targets = sample_sheet_filtered, verbose = TRUE)
     
     message("RGChannelSet dimensions:", dim(rgSet), "\n")
     message("RGChannelSet sample names:", paste(head(colnames(rgSet)), collapse = ", "), "\n")
@@ -326,7 +323,7 @@ read_idat_zip <- function(zip_file,
         }
       }
     }, error = function(e) {
-      warning("  Warning: Could not perform detailed QC:", e$message, "\n")
+      warning("Could not perform detailed QC: ", e$message, call. = FALSE)
     })
     
     # Calculate failed probe proportions if we have detection p-values
@@ -340,7 +337,7 @@ read_idat_zip <- function(zip_file,
         failed_per_sample <- colMeans(detP > detection_pval, na.rm = TRUE)
         names(failed_per_sample) <- colnames(rgSet)
       } else {
-        warning("  Warning: Dimension mismatch between detP and rgSet\n")
+        warning("Dimension mismatch between detP and rgSet", call. = FALSE)
       }
     }
     
@@ -468,8 +465,8 @@ read_idat_zip <- function(zip_file,
     }
     
     # Detailed error information
-    message("\n=== ERROR DEBUGGING INFO ===\n")
-    message("Error message:", e$message, "\n")
+    message("\n=== ERROR DEBUGGING INFO ===")
+    message("Error message: ", e$message)
     message("Original sample count:", original_sample_count, "\n")
     
     if (!is.null(sample_sheet)) {
@@ -493,6 +490,6 @@ read_idat_zip <- function(zip_file,
     
     message("==========================\n")
     
-    stop("Error processing IDAT files: ", e$message)
+    stop("Error processing IDAT files: ", e$message, call. = FALSE)
   })
 }

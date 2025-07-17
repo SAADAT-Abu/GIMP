@@ -12,3 +12,9 @@ Character vector of all available minfi functions
 \description{
 Diagnostic function to check which minfi functions are available in the current installation.
 }
+\examples{
+\donttest{
+# Check which minfi functions are available
+available_funcs <- check_minfi_functions()
+}
+}

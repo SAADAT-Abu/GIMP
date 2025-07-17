@@ -50,14 +50,14 @@ plot_line_ICR <- function(significantDMPs, ICRcpg, ICR, sampleInfo, interactive 
   required_cols <- c("cstart", "ICR", "start", "end")
   missing_cols <- setdiff(required_cols, colnames(ICRcpg))
   if (length(missing_cols) > 0) {
-    stop(paste("Missing required columns in ICRcpg:", paste(missing_cols, collapse = ", ")))
+    stop("Missing required columns in ICRcpg: ", paste(missing_cols, collapse = ", "))
   }
   
   # Filter by ICR name first, then by coordinates
   regionCpGs <- ICRcpg[ICRcpg$ICR == ICR, ]
   
   if (nrow(regionCpGs) == 0) {
-    stop(paste("No CpGs found for ICR", ICR, "in ICRcpg data."))
+    stop("No CpGs found for ICR ", ICR, " in ICRcpg data.")
   }
   
   message("Found", nrow(regionCpGs), "CpGs for ICR", ICR, "\n")
@@ -72,8 +72,8 @@ plot_line_ICR <- function(significantDMPs, ICRcpg, ICR, sampleInfo, interactive 
   
   # Check sampleInfo length matches methylation data
   if (length(sampleInfo) != length(methylation_col_indices)) {
-    stop(paste("sampleInfo length (", length(sampleInfo), 
-               ") doesn't match number of samples (", length(methylation_col_indices), ")"))
+    stop("sampleInfo length (", length(sampleInfo), 
+         ") doesn't match number of samples (", length(methylation_col_indices), ")")
   }
   
   # Extract methylation data and annotation
@@ -101,7 +101,7 @@ plot_line_ICR <- function(significantDMPs, ICRcpg, ICR, sampleInfo, interactive 
                                           variable.name = "Sample", 
                                           value.name = "Methylation")
   }, error = function(e) {
-    stop(paste("Error reshaping data:", e$message))
+    stop("Error reshaping data: ", e$message, call. = FALSE)
   })
   
   # Add sample type information
@@ -156,14 +156,14 @@ plot_line_ICR <- function(significantDMPs, ICRcpg, ICR, sampleInfo, interactive 
             showlegend = TRUE
           )
       }, error = function(e) {
-        warning(paste("Failed to create interactive plot:", e$message, ". Returning static plot."))
-        interactive <<- FALSE  # Fall back to static
+        warning("Failed to create interactive plot: ", e$message, ". Returning static plot.")
+        interactive <- FALSE  # Fall back to static
       })
     }
     
     return(plot)
     
   }, error = function(e) {
-    stop(paste("Error creating plot:", e$message))
+    stop("Error creating plot: ", e$message, call. = FALSE)
   })
 }

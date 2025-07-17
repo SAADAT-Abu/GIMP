@@ -41,7 +41,7 @@ iDMPs <- function(data, sampleInfo, pValueCutoff = 0.05) {
   
   # Separate methylation data from annotation properly ***
   # All columns except the annotation columns are methylation data
-  methylation_col_indices <- setdiff(1:ncol(data), annotation_col_indices)
+  methylation_col_indices <- setdiff(seq_len(ncol(data)), annotation_col_indices)
   
   if (length(methylation_col_indices) == 0) {
     stop("No methylation data columns found.")
@@ -53,13 +53,13 @@ iDMPs <- function(data, sampleInfo, pValueCutoff = 0.05) {
   # Ensure we have the expected annotation columns
   missing_cols <- setdiff(expected_annotation_cols, colnames(additionalColumns))
   if (length(missing_cols) > 0) {
-    stop(paste("Missing annotation columns:", paste(missing_cols, collapse = ", ")))
+    stop("Missing annotation columns: ", paste(missing_cols, collapse = ", "))
   }
   
   # Check dimensions match ***
   if (ncol(methylationData) != length(sampleInfo)) {
-    stop(paste("Number of samples in methylation data (", ncol(methylationData), 
-               ") doesn't match sampleInfo length (", length(sampleInfo), ")"))
+    stop("Number of samples in methylation data (", ncol(methylationData), 
+         ") doesn't match sampleInfo length (", length(sampleInfo), ")")
   }
   
   # Improved beta to M-value conversion with error handling ***
@@ -79,8 +79,8 @@ iDMPs <- function(data, sampleInfo, pValueCutoff = 0.05) {
     stop("No CpGs with sufficient data found.")
   }
   
-  cat("Removing", sum(!valid_rows), "CpGs with >50% missing values\n")
-  cat("Analyzing", sum(valid_rows), "CpGs\n")
+  message("Removing ", sum(!valid_rows), " CpGs with >50% missing values")
+  message("Analyzing ", sum(valid_rows), " CpGs")
   
   methylationData <- methylationData[valid_rows, ]
   additionalColumns <- additionalColumns[valid_rows, ]
@@ -90,7 +90,7 @@ iDMPs <- function(data, sampleInfo, pValueCutoff = 0.05) {
   
   # Handle remaining NAs in M-values ***
   # Impute remaining NAs with row means
-  for (i in 1:nrow(mValues)) {
+  for (i in seq_len(nrow(mValues))) {
     if (any(is.na(mValues[i, ]))) {
       row_mean <- mean(mValues[i, ], na.rm = TRUE)
       if (!is.na(row_mean)) {
@@ -113,7 +113,7 @@ iDMPs <- function(data, sampleInfo, pValueCutoff = 0.05) {
   coefName <- paste0("sampleInfo", groupLabels[2])  # Select second group relative to "Control"
   
   if (!coefName %in% colnames(fit$coefficients)) {
-    stop(paste("Coefficient", coefName, "not found in the fit model. Check group labels."))
+    stop("Coefficient ", coefName, " not found in the fit model. Check group labels.")
   }
   
   # Get all results first, then filter ***
@@ -127,7 +127,7 @@ iDMPs <- function(data, sampleInfo, pValueCutoff = 0.05) {
   # Filter by p-value
   significantDMPs <- topDMPs_with_annotation[topDMPs_with_annotation$P.Value <= pValueCutoff, ]
   
-  cat("Found", nrow(significantDMPs), "significant DMPs at p <", pValueCutoff, "\n")
+  message("Found ", nrow(significantDMPs), " significant DMPs at p < ", pValueCutoff)
   
   return(list(
     fit = fit,
