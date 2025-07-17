@@ -111,9 +111,9 @@ ui <- dashboardPage(
                   
                   radioButtons("arrayType", "Array Type:",
                     choices = list(
-                      "450k (hg19)" = "450k"
+                      "450k (hg19)" = "450k",
                       "EPIC v1 (hg19)" = "v1",
-                      "EPIC v2 (hg38)" = "v2", 
+                      "EPIC v2 (hg38)" = "v2"
                     ),
                     selected = "v1"
                   )
