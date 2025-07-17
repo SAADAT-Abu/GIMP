@@ -103,8 +103,17 @@ plot_line_ICR <- function(significantDMPs, ICRcpg, ICR, sampleInfo, interactive 
     stop("Error reshaping data: ", e$message, call. = FALSE)
   })
   
-  # Add sample type information
-  methylationDataLong$SampleGroup <- sampleInfo
+  # Add sample type information - FIXED: proper mapping of sample to group
+  # Create a mapping dataframe from sample names to groups
+  sample_names <- colnames(methylationData)[colnames(methylationData) != "cstart"]
+  sample_group_mapping <- data.frame(
+    Sample = sample_names,
+    SampleGroup = sampleInfo,
+    stringsAsFactors = FALSE
+  )
+  
+  # Merge to get correct group assignment for each sample
+  methylationDataLong <- merge(methylationDataLong, sample_group_mapping, by = "Sample", all.x = TRUE)
   
   # Mark which CpGs are DMPs
   methylationDataLong$IsDMP <- methylationDataLong$cstart %in% regionDMPs$cstart
@@ -147,9 +156,9 @@ plot_line_ICR <- function(significantDMPs, ICRcpg, ICR, sampleInfo, interactive 
     color_mapping <- c("yellow3", "purple4")
     names(color_mapping) <- c(control_label, case_label)
     
-    # Create the plot - FIXED: moved constant aesthetics outside aes()
-    plot <- ggplot(methylationDataLong, aes(x = cstart, y = Methylation, color = SampleGroup)) +
-      geom_line(linetype = 1, alpha = 0.5, size = 0.5) +  # FIXED: removed from aes()
+    # Create the plot - FIXED: group by Sample to get one line per sample
+    plot <- ggplot(methylationDataLong, aes(x = cstart, y = Methylation, group = Sample, color = SampleGroup)) +
+      geom_line(linetype = 1, alpha = 0.5, size = 0.5) +  # Now each sample gets its own line
       geom_point(data = methylationDataLong[!methylationDataLong$IsDMP, ], 
                  size = 1, alpha = 0.7) +
       geom_point(data = methylationDataLong[methylationDataLong$IsDMP, ], 
