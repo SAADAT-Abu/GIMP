@@ -46,7 +46,6 @@ plot_line_ICR <- function(significantDMPs, ICRcpg, ICR, sampleInfo, interactive 
   message("Region boundaries:", regionStart, "to", regionEnd, "\n")
   
   # Filter CpGs for the specified ICR region
-  # First, check if ICRcpg has the required columns
   required_cols <- c("cstart", "ICR", "start", "end")
   missing_cols <- setdiff(required_cols, colnames(ICRcpg))
   if (length(missing_cols) > 0) {
@@ -119,8 +118,39 @@ plot_line_ICR <- function(significantDMPs, ICRcpg, ICR, sampleInfo, interactive 
   
   message("Final data for plotting has", nrow(methylationDataLong), "points\n")
   
-  # Create the plot
+  # Create the plot with DYNAMIC COLOR MAPPING
   tryCatch({
+    
+    # Extract unique labels from sampleInfo
+    unique_labels <- unique(sampleInfo)
+    
+    # Validate that we have exactly 2 groups
+    if (length(unique_labels) != 2) {
+      stop(paste("Expected exactly 2 groups for plotting, but found", length(unique_labels), 
+                 "groups:", paste(unique_labels, collapse = ", ")))
+    }
+    
+    # Determine which label should be control and which should be case
+    if ("Control" %in% unique_labels) {
+      control_label <- "Control"
+      case_label <- setdiff(unique_labels, "Control")
+    } else if ("control" %in% unique_labels) {
+      control_label <- "control"
+      case_label <- setdiff(unique_labels, "control")
+    } else {
+      sorted_labels <- sort(unique_labels)
+      control_label <- sorted_labels[1]
+      case_label <- sorted_labels[2]
+    }
+    
+    # Create dynamic color and linetype mapping
+    color_mapping <- c("yellow3", "purple4")
+    names(color_mapping) <- c(control_label, case_label)
+    
+    linetype_mapping <- c("solid", "solid")
+    names(linetype_mapping) <- c(control_label, case_label)
+    
+    # Create the plot
     plot <- ggplot(methylationDataLong, aes(x = cstart, y = Methylation, group = Sample, color = Type)) +
       geom_line(aes(linetype = Type), alpha = 0.5, size = 0.5) +
       geom_point(data = methylationDataLong[!methylationDataLong$IsDMP, ], 
@@ -131,11 +161,15 @@ plot_line_ICR <- function(significantDMPs, ICRcpg, ICR, sampleInfo, interactive 
                  aes(xintercept = x), color = "lightgrey", linetype = "dashed", alpha = 0.7) +
       geom_rug(data = methylationDataLong[methylationDataLong$IsDMP, ], 
                aes(x = cstart), color = "red", sides = "t", alpha = 0.8) +
-      scale_color_manual("Group", values = c("Control" = "blue", "Case" = "red")) +
-      scale_linetype_manual("Group", values = c("Control" = "solid", "Case" = "solid")) +
+      
+      # DYNAMIC SCALES
+      scale_color_manual("Group", values = color_mapping) +
+      scale_linetype_manual("Group", values = linetype_mapping) +
+      
       labs(
         title = paste("Methylation Profile:", ICR),
-        subtitle = paste("Showing", sum(methylationDataLong$IsDMP), "significant DMPs"),
+        subtitle = paste("Showing", sum(methylationDataLong$IsDMP), "significant DMPs |", 
+                         control_label, "(blue) vs", case_label, "(red)"),
         x = "CpG Coordinates (bp)",
         y = "Methylation Value (Beta)"
       ) +

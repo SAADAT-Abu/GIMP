@@ -111,9 +111,9 @@ ui <- dashboardPage(
                   
                   radioButtons("arrayType", "Array Type:",
                     choices = list(
+                      "450k (hg19)" = "450k"
                       "EPIC v1 (hg19)" = "v1",
                       "EPIC v2 (hg38)" = "v2", 
-                      "450k (hg19)" = "450k"
                     ),
                     selected = "v1"
                   )
@@ -175,8 +175,8 @@ ui <- dashboardPage(
                 column(6,
                   selectInput("idatArrayType", "Array Type:",
                     choices = list(
-                      "EPIC (850k)" = "EPIC",
                       "450k" = "450k",
+                      "EPIC (850k)" = "EPIC",
                       "EPICv2 (935k)" = "EPICv2"
                     ),
                     selected = "EPIC"
@@ -343,7 +343,8 @@ ui <- dashboardPage(
                       "Defect Matrix" = "defect"
                     ),
                     selected = "beta"
-                  )
+                  ),
+                  helpText("Beta: Raw methylation (0-1), Delta: Difference from controls, Defect: Binary abnormal patterns")
                 ),
                 
                 column(4,
@@ -352,19 +353,34 @@ ui <- dashboardPage(
                       "Coordinates" = "cord",
                       "Methylation Values" = "meth"
                     ),
-                    selected = "cord"
-                  )
+                    selected = "meth"
+                  ),
+                  helpText("Coordinates: Genomic position, Methylation: Cluster by similarity")
                 ),
                 
                 column(4,
-                  conditionalPanel(
-                    condition = "input.plotType == 'defect'",
-                    numericInput("sdThreshold", "SD Threshold:",
-                      value = 3, min = 1, max = 5, step = 0.5
-                    )
+            conditionalPanel(
+              condition = "input.plotType == 'defect'",
+              div(
+                h5("SD Threshold:", style = "margin-bottom: 5px;"),
+                sliderInput("sdThreshold",
+                  label = NULL,
+                  value = 3.0,
+                  min = 1.0,
+                  max = 5.0,
+                  step = 0.1,
+                  ticks = TRUE,
+                  animate = FALSE
+                ),
+                helpText("Lower = more sensitive detection", style = "margin-top: -10px; font-size: 11px;"),
+                div(
+                  style = "font-size: 10px; color: #666; margin-top: 5px;",
+                  "1.5-2.0: Very sensitive | 2.5-3.0: Standard | 3.5+: Conservative"
                   )
                 )
-              ),
+              )
+            )
+            ),
               
               actionButton("generateHeatmap", "Generate Heatmap", 
                 class = "btn-success", 
