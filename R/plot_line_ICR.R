@@ -104,7 +104,7 @@ plot_line_ICR <- function(significantDMPs, ICRcpg, ICR, sampleInfo, interactive 
   })
   
   # Add sample type information
-  methylationDataLong$SampleGroup <- sampleInfo
+  methylationDataLong$Type <- rep(sampleInfo, each = nrow(methylationData))
   
   # Mark which CpGs are DMPs
   methylationDataLong$IsDMP <- methylationDataLong$cstart %in% regionDMPs$cstart
@@ -151,7 +151,7 @@ plot_line_ICR <- function(significantDMPs, ICRcpg, ICR, sampleInfo, interactive 
     names(linetype_mapping) <- c(control_label, case_label)
     
     # Create the plot
-    plot <- ggplot(methylationDataLong, aes(x = cstart, y = Methylation, group = SampleGroup, color = SampleGroup)) +
+    plot <- ggplot(methylationDataLong, aes(x = cstart, y = Methylation, group = sampleInfo, color = Type)) +
       geom_line(aes(linetype = Type), alpha = 0.5, size = 0.5) +
       geom_point(data = methylationDataLong[!methylationDataLong$IsDMP, ], 
                  size = 1, alpha = 0.7) +
