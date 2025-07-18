@@ -547,7 +547,7 @@ For additional support, please consult the documentation, GitHub repository, or 
 
 ---
 
-**Last Updated**: June 2025  
+**Last Updated**: July 2025  
 **Version**: 0.2.0  
 **Contact**: francesco.cecerengs@gmail.com  
 **GitHub**: [https://github.com/ngsFC/GIMP](https://github.com/ngsFC/GIMP)  
