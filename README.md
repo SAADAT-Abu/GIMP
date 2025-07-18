@@ -10,7 +10,7 @@
 
 **GIMP** (Genomic Imprinting Methylation Patterns) is an R package designed for the comprehensive analysis of Imprinting Control Regions (ICRs) from methylation array data. It provides a complete pipeline for extracting imprinted CpGs (iCpGs), computing coverage, and analyzing ICRs at both probe and sample-specific levels.
 
-** This Repo is a fork of [ngsFC/GIMP.git](https://github.com/ngsFC/GIMP.git)
+**This Repo is a fork of [ngsFC/GIMP.git](https://github.com/ngsFC/GIMP.git)**
 
 **🆕 NEW in v0.2.0**: GIMP now has a shinyApp supports **direct processing of raw IDAT files** from ZIP archives, making it a complete solution from raw data to specialized genomic imprinting analysis!
 
