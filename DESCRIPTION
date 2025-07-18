@@ -16,7 +16,7 @@ LazyDataCompression: xz
 RoxygenNote: 7.3.2
 Depends: R (>= 4.4.3), tidyverse, valr, reshape2, ggplot2, pheatmap,
         viridisLite, ggplotify, readr, shiny, plotly, BiocManager,
-        minfi
+        minfi, doParallel
 Imports: shiny, shinydashboard, DT, plotly, minfi,
         IlluminaHumanMethylation450kanno.ilmn12.hg19,
         IlluminaHumanMethylationEPICanno.ilm10b4.hg19,

@@ -116,6 +116,14 @@ idat_data <- read_idat_zip(
   normalize_method = "quantile"
 )
 
+# Process with parallel processing (recommended for large datasets)
+idat_data <- read_idat_zip(
+  zip_file = "methylation_data.zip",
+  array_type = "EPIC",
+  normalize_method = "quantile",
+  n_cores = 4  # Use 4 CPU cores for faster processing
+)
+
 # Extract processed data
 beta_matrix <- idat_data$beta_matrix
 sample_info <- idat_data$sample_info

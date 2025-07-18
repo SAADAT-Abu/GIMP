@@ -9,6 +9,7 @@
 #' @param normalize_method Normalization method for minfi ("quantile", "SWAN", "funnorm", "noob")
 #' @param detection_pval P-value threshold for detection (default: 0.01)
 #' @param remove_failed_samples Remove samples with >10 percent failed probes (default: TRUE)
+#' @param n_cores Number of CPU cores to use for parallel processing (default: NULL for sequential processing)
 #' 
 #' @return A list containing:
 #' \item{beta_matrix}{Beta value matrix ready for GIMP analysis}
@@ -21,6 +22,9 @@
 #' idat_data <- read_idat_zip("my_methylation_data.zip", array_type = "EPIC")
 #' beta_matrix <- idat_data$beta_matrix
 #' 
+#' # Use parallel processing with 4 cores
+#' idat_data <- read_idat_zip("my_methylation_data.zip", array_type = "EPIC", n_cores = 4)
+#' 
 #' # Use with GIMP functions
 #' ICRcpg <- make_cpgs(Bmatrix = beta_matrix, bedmeth = "v1")
 #' @export
@@ -30,11 +34,29 @@ read_idat_zip <- function(zip_file,
                           temp_dir = NULL,
                           normalize_method = c("quantile", "SWAN", "funnorm", "noob"),
                           detection_pval = 0.01,
-                          remove_failed_samples = TRUE) {
+                          remove_failed_samples = TRUE,
+                          n_cores = NULL) {
   
   # Check required packages
   if (!requireNamespace("minfi", quietly = TRUE)) {
     stop("minfi package is required. Install with: BiocManager::install('minfi')")
+  }
+  
+  # Setup parallel processing
+  if (!is.null(n_cores)) {
+    max_cores <- parallel::detectCores()
+    if (n_cores > max_cores) {
+      warning("Requested ", n_cores, " cores but only ", max_cores, " are available. Using ", max_cores - 2, " cores.")
+      n_cores <- max(1, max_cores - 2)
+    }
+    
+    # Load parallel processing packages
+    if (!requireNamespace("parallel", quietly = TRUE)) {
+      warning("parallel package not available. Proceeding with sequential processing.")
+      n_cores <- NULL
+    } else {
+      message("Using ", n_cores, " cores for parallel processing\n")
+    }
   }
   
   # Validate inputs
@@ -301,7 +323,19 @@ read_idat_zip <- function(zip_file,
     tryCatch({
       # Try different detection functions
       if (exists("detectionP", envir = asNamespace("minfi"))) {
-        detP <- detectionP(rgSet)
+        if (!is.null(n_cores) && n_cores > 1) {
+          message("  Computing detection p-values with ", n_cores, " cores\n")
+          # Use parallel processing for detection p-values if available
+          if (requireNamespace("BiocParallel", quietly = TRUE)) {
+            BiocParallel::register(BiocParallel::MulticoreParam(workers = n_cores))
+            detP <- detectionP(rgSet)
+          } else {
+            message("  BiocParallel not available, using sequential processing\n")
+            detP <- detectionP(rgSet)
+          }
+        } else {
+          detP <- detectionP(rgSet)
+        }
         message("  Using detectionP function\n")
       } else {
         warning("  detectionP function not available, using simplified QC\n")
@@ -375,6 +409,12 @@ read_idat_zip <- function(zip_file,
     
     # Normalization
     message("Normalizing data using", normalize_method, "method...\n")
+    
+    # Apply parallel processing for normalization if available
+    if (!is.null(n_cores) && n_cores > 1 && requireNamespace("BiocParallel", quietly = TRUE)) {
+      message("  Using ", n_cores, " cores for normalization\n")
+      BiocParallel::register(BiocParallel::MulticoreParam(workers = n_cores))
+    }
     
     mSet <- switch(normalize_method,
                    "quantile" = preprocessQuantile(rgSet),

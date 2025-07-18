@@ -243,7 +243,8 @@ server <- function(input, output, session) {
         array_type = input$idatArrayType,
         normalize_method = input$normMethod,
         detection_pval = input$detectionPval,
-        remove_failed_samples = input$removeFailedSamples
+        remove_failed_samples = input$removeFailedSamples,
+        n_cores = if(input$enableParallel) input$nCores else NULL
       )
       
       # Store results

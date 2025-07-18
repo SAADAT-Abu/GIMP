@@ -215,6 +215,17 @@ ui <- dashboardPage(
                   checkboxInput("removeFailedSamples", "Remove Failed Samples", value = TRUE),
                   helpText("Remove samples with >10% failed probes."),
                   
+                  checkboxInput("enableParallel", "Enable Parallel Processing", value = FALSE),
+                  helpText("Use multiple CPU cores to speed up processing (requires more memory)."),
+                  
+                  conditionalPanel(
+                    condition = "input.enableParallel == true",
+                    numericInput("nCores", "Number of CPU Cores:",
+                      value = 2, min = 1, max = 16, step = 1
+                    ),
+                    helpText("Number of CPU cores to use. System will automatically limit to available cores.")
+                  ),
+                  
                   br(),
                   actionButton("processIDAT", "Process IDAT Files", 
                     class = "btn-success btn-lg",
