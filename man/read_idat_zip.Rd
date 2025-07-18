@@ -13,7 +13,8 @@ read_idat_zip(
   temp_dir = NULL,
   normalize_method = c("quantile", "SWAN", "funnorm", "noob"),
   detection_pval = 0.01,
-  remove_failed_samples = TRUE
+  remove_failed_samples = TRUE,
+  n_cores = NULL
 )
 }
 \arguments{
@@ -30,6 +31,8 @@ read_idat_zip(
 \item{detection_pval}{P-value threshold for detection (default: 0.01)}
 
 \item{remove_failed_samples}{Remove samples with >10 percent failed probes (default: TRUE)}
+
+\item{n_cores}{Number of CPU cores to use for parallel processing (default: NULL for sequential processing)}
 }
 \value{
 A list containing:
@@ -47,6 +50,9 @@ IDAT files and a sample sheet, returning a beta value matrix ready for GIMP anal
 # Read IDAT files from ZIP
 idat_data <- read_idat_zip("my_methylation_data.zip", array_type = "EPIC")
 beta_matrix <- idat_data$beta_matrix
+
+# Use parallel processing with 4 cores
+idat_data <- read_idat_zip("my_methylation_data.zip", array_type = "EPIC", n_cores = 4)
 
 # Use with GIMP functions
 ICRcpg <- make_cpgs(Bmatrix = beta_matrix, bedmeth = "v1")
