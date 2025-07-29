@@ -10,9 +10,7 @@
 
 **GIMP** (Genomic Imprinting Methylation Patterns) is an R package designed for the comprehensive analysis of Imprinting Control Regions (ICRs) from methylation array data. It provides a complete pipeline for extracting imprinted CpGs (iCpGs), computing coverage, and analyzing ICRs at both probe and sample-specific levels.
 
-**This Repo is a fork of [ngsFC/GIMP.git](https://github.com/ngsFC/GIMP.git)**
-
-**🆕 NEW in v0.2.0**: GIMP now has a shinyApp supports **direct processing of raw IDAT files** from ZIP archives, making it a complete solution from raw data to specialized genomic imprinting analysis!
+**🆕 NEW in v0.2.0**: GIMP now has a shinyApp that supports **direct processing of raw IDAT files or loading data directly from GEO**, making it a one stop solution genomic imprinting analysis!
 
 ## Features
 
@@ -373,15 +371,6 @@ GIMP uses curated ICR coordinates from:
 - **Preprocessed data**: From other methylation analysis pipelines
 - **Clinical samples**: Hospital/research institution data
 
-## Citation
-
-If you use GIMP in your research, please cite:
-
-```
-Cecere, F. (2024). GIMP: Genomic Imprinting Methylation Patterns. 
-R package version 0.2.0. https://github.com/ngsFC/GIMP
-```
-
 ## Contributing
 
 We welcome contributions! Please:
@@ -390,6 +379,16 @@ We welcome contributions! Please:
 2. **Suggest features**: Describe your use case and proposed functionality
 3. **Submit code**: Follow R package development best practices
 4. **Share datasets**: Help us test with diverse methylation data
+
+```
+**Last Updated**: July 2025  
+**Version**: 0.2.0  
+**Contact**: francesco.cecerengs@gmail.com  
+**GitHub**: [https://github.com/ngsFC/GIMP](https://github.com/ngsFC/GIMP)  
+**Contact**: saadatabu1996@gmail.com  
+**GitHub**: [https://github.com/SAADAT-Abu](https://github.com/SAADAT-Abu)
+
+```
 
 ## Support
 
