@@ -56,6 +56,13 @@ methylation_data.zip
 └── samplesheet.csv
 ```
 
+### Option 3: GEO Dataset 
+**Best for**: Publically available data in GEO
+
+ - Enter a GEO Series ID (e.g., GSE68777)
+ - Validate the dataset to check for IDAT files
+ - Configure processing options (group detection, normalization)
+ 
 ## Sample Sheet Creation Guide
 
 ### Required Columns

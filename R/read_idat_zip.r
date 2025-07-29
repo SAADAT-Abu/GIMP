@@ -306,7 +306,7 @@ read_idat_zip <- function(zip_file,
     # Ensure rownames are set properly for minfi
     rownames(sample_sheet_filtered) <- sample_sheet_filtered$Sample_Name
     
-    rgSet <- minfi::read.metharray.exp(targets = sample_sheet_filtered, verbose = TRUE)
+    rgSet <- minfi::read.metharray.exp(targets = sample_sheet_filtered, verbose = TRUE, force = TRUE)
     
     message("RGChannelSet dimensions:", dim(rgSet), "\n")
     message("RGChannelSet sample names:", paste(head(colnames(rgSet)), collapse = ", "), "\n")

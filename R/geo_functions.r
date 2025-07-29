@@ -846,8 +846,14 @@ extract_sentrix_info <- function(idat_basenames) {
     # Try standard pattern
     if (grepl(sentrix_pattern, basename)) {
       matches <- regmatches(basename, regexec(sentrix_pattern, basename))[[1]]
-      sentrix_ids[i] <- matches[2]
-      sentrix_positions[i] <- matches[3]
+      if (length(matches) >= 3) {
+        sentrix_ids[i] <- matches[2]
+        sentrix_positions[i] <- matches[3]
+      } else {
+        # Fallback if regex extraction fails
+        sentrix_ids[i] <- paste0("200000000", sprintf("%02d", i))
+        sentrix_positions[i] <- paste0("R", sprintf("%02d", ((i-1) %% 8) + 1), "C01")
+      }
     } else {
       # Fallback: create synthetic IDs
       sentrix_ids[i] <- paste0("200000000", sprintf("%02d", i))
@@ -1084,4 +1090,395 @@ diagnose_geo_dataset <- function(geo_id, temp_dir = NULL) {
       error_message = e$message
     ))
   })
+}
+
+#' Get phenotypic data preview for GEO dataset
+#'
+#' @description
+#' Downloads and returns phenotypic data from a GEO dataset for user review
+#' before processing. This allows users to select appropriate grouping columns.
+#'
+#' @param geo_id Character string of GEO accession (e.g., "GSE12345")
+#' @return List containing phenotypic data and metadata
+#' @examples
+#' \donttest{
+#' # Get phenotypic data for review
+#' pheno_preview <- get_geo_phenotype_data("GSE68777")
+#' head(pheno_preview$pheno_data)
+#' }
+#' @export
+get_geo_phenotype_data <- function(geo_id) {
+  
+  if (!requireNamespace("GEOquery", quietly = TRUE)) {
+    stop("GEOquery package is required. Install with: BiocManager::install('GEOquery')")
+  }
+  
+  geo_id <- toupper(trimws(geo_id))
+  
+  message("Downloading phenotypic data for: ", geo_id)
+  
+  tryCatch({
+    # Get GSE data
+    gse <- GEOquery::getGEO(geo_id, GSEMatrix = TRUE)
+    
+    if (length(gse) == 0) {
+      stop("No data found for GEO ID: ", geo_id)
+    }
+    
+    # Extract phenotypic data from the first series matrix
+    eset <- gse[[1]]
+    pheno_data <- Biobase::pData(eset)
+    
+    # Get dataset metadata
+    if (length(gse) > 0) {
+      gse_meta <- GEOquery::getGEO(geo_id, GSEMatrix = FALSE)
+      title <- GEOquery::Meta(gse_meta)$title %||% "Unknown"
+      summary <- GEOquery::Meta(gse_meta)$summary %||% "No summary available"
+    } else {
+      title <- "Unknown"
+      summary <- "No summary available"
+    }
+    
+    # Clean column names and identify potential grouping columns
+    potential_group_cols <- grep("group|condition|treatment|disease|status|type|class|characteristics", 
+                                colnames(pheno_data), ignore.case = TRUE, value = TRUE)
+    
+    # Get unique values for each potential column (limited to avoid overwhelming output)
+    column_previews <- list()
+    for (col in potential_group_cols) {
+      unique_vals <- unique(as.character(pheno_data[[col]]))
+      if (length(unique_vals) <= 20) {  # Only show columns with reasonable number of unique values
+        column_previews[[col]] <- unique_vals[!is.na(unique_vals)]
+      }
+    }
+    
+    message("Successfully retrieved phenotypic data: ", nrow(pheno_data), " samples, ", 
+            ncol(pheno_data), " variables")
+    
+    return(list(
+      geo_id = geo_id,
+      title = title,
+      summary = if(nchar(summary) > 300) paste0(substr(summary, 1, 300), "...") else summary,
+      pheno_data = pheno_data,
+      sample_count = nrow(pheno_data),
+      potential_group_columns = potential_group_cols,
+      column_previews = column_previews,
+      success = TRUE
+    ))
+    
+  }, error = function(e) {
+    return(list(
+      success = FALSE,
+      error_message = paste("Failed to get phenotypic data:", e$message)
+    ))
+  })
+}
+
+#' Process GEO dataset with user-specified group mappings
+#'
+#' @description
+#' Downloads and processes a GEO dataset using user-defined group mappings
+#' instead of auto-detection. This is the main processing function after
+#' users have reviewed phenotypic data and defined their group mappings.
+#'
+#' @param geo_id Character string of GEO accession
+#' @param group_column Column name containing group information
+#' @param group_mappings Named list mapping values to "Case", "Control", or "Exclude"
+#' @param max_samples Maximum number of samples to process
+#' @param normalize_method Normalization method for minfi
+#' @param n_cores Number of CPU cores for parallel processing
+#' @param download_dir Directory to download files (default: temporary directory)
+#'
+#' @return List containing processed beta matrix and sample information
+#' @examples
+#' \donttest{
+#' # Process with user-defined mappings
+#' mappings <- list("tumor" = "Case", "normal" = "Control", "unknown" = "Exclude")
+#' geo_data <- process_geo_with_mappings(
+#'   geo_id = "GSE68777",
+#'   group_column = "characteristics_ch1.1", 
+#'   group_mappings = mappings
+#' )
+#' }
+#' @export
+process_geo_with_mappings <- function(geo_id,
+                                     group_column,
+                                     group_mappings,
+                                     max_samples = NULL,
+                                     normalize_method = "quantile",
+                                     n_cores = NULL,
+                                     download_dir = NULL) {
+  
+  # Validate prerequisites
+  if (!requireNamespace("GEOquery", quietly = TRUE)) {
+    stop("GEOquery package is required. Install with: BiocManager::install('GEOquery')")
+  }
+  
+  # Validate dataset first
+  validation <- validate_geo_dataset(geo_id)
+  if (!validation$valid) {
+    stop("Dataset validation failed: ", validation$message)
+  }
+  
+  if (!validation$has_idats) {
+    stop("Dataset does not contain IDAT files. GIMP requires raw IDAT data.")
+  }
+  
+  message("=== PROCESSING GEO DATASET WITH USER MAPPINGS: ", geo_id, " ===")
+  message("Title: ", validation$title)
+  message("Array type: ", validation$array_type)
+  message("Sample count: ", validation$sample_count)
+  message("Group column: ", group_column)
+  message("Group mappings: ", paste(names(group_mappings), "->", group_mappings, collapse = ", "))
+  
+  # Setup directories
+  if (is.null(download_dir)) {
+    download_dir <- file.path(tempdir(), paste0("geo_", geo_id))
+  }
+  
+  if (!dir.exists(download_dir)) {
+    dir.create(download_dir, recursive = TRUE)
+  }
+  
+  idat_dir <- file.path(download_dir, "idats")
+  if (!dir.exists(idat_dir)) {
+    dir.create(idat_dir, recursive = TRUE)
+  }
+  
+  # Download and extract data
+  message("\n=== DOWNLOADING GEO DATA ===")
+  
+  tryCatch({
+    # Get detailed GSE information
+    gse <- GEOquery::getGEO(geo_id, destdir = download_dir, GSEMatrix = TRUE)
+    
+    # Extract phenotypic data
+    if (length(gse) > 1) {
+      message("Multiple series detected, using the first one")
+    }
+    
+    eset <- gse[[1]]
+    pheno_data <- Biobase::pData(eset)
+    
+    message("Phenotypic data extracted: ", nrow(pheno_data), " samples, ",
+            ncol(pheno_data), " variables")
+    
+    # Validate group column exists
+    if (!group_column %in% colnames(pheno_data)) {
+      stop("Group column '", group_column, "' not found in phenotypic data")
+    }
+    
+    # Download supplementary files (IDAT files)
+    message("\n=== DOWNLOADING IDAT FILES ===")
+    supp_files <- GEOquery::getGEOSuppFiles(geo_id, baseDir = download_dir,
+                                           fetch_files = TRUE)
+    
+    # Extract any compressed files
+    extract_compressed_files(file.path(download_dir, geo_id))
+    
+    # Find and organize IDAT files
+    idat_files <- find_and_organize_idats(file.path(download_dir, geo_id), idat_dir)
+    
+    if (length(idat_files) == 0) {
+      stop("No IDAT files found in downloaded supplementary data")
+    }
+    
+    message("Found ", length(idat_files), " IDAT files")
+    
+    # Create sample sheet with user-defined mappings
+    message("\n=== CREATING SAMPLE SHEET WITH USER MAPPINGS ===")
+    sample_sheet <- create_geo_sample_sheet_with_mappings(
+      pheno_data = pheno_data,
+      idat_files = idat_files,
+      group_column = group_column,
+      group_mappings = group_mappings,
+      max_samples = max_samples
+    )
+    
+    message("Sample sheet created with ", nrow(sample_sheet), " samples")
+    
+    # Show final group distribution
+    group_table <- table(sample_sheet$Sample_Group)
+    message("Final group distribution: ", paste(names(group_table), "=", group_table, collapse = ", "))
+    
+    # Save sample sheet
+    sample_sheet_path <- file.path(idat_dir, "samplesheet.csv")
+    write.csv(sample_sheet, sample_sheet_path, row.names = FALSE)
+    
+    # Create ZIP file for compatibility with existing GIMP functions
+    message("\n=== CREATING ZIP FOR PROCESSING ===")
+    zip_path <- create_geo_zip(idat_dir, download_dir, geo_id)
+    
+    # Process with existing GIMP IDAT pipeline
+    message("\n=== PROCESSING WITH GIMP PIPELINE ===")
+    
+    idat_results <- read_idat_zip(
+      zip_file = zip_path,
+      sample_sheet_name = "samplesheet.csv",
+      array_type = validation$array_type,
+      normalize_method = normalize_method,
+      detection_pval = 0.01,
+      remove_failed_samples = TRUE,
+      n_cores = n_cores
+    )
+    
+    # Add GEO-specific metadata
+    idat_results$geo_metadata <- list(
+      geo_id = geo_id,
+      title = validation$title,
+      array_type = validation$array_type,
+      original_sample_count = validation$sample_count,
+      processed_sample_count = ncol(idat_results$beta_matrix),
+      download_dir = download_dir,
+      group_column = group_column,
+      group_mappings = group_mappings,
+      processing_method = "user_guided"
+    )
+    
+    message("\n=== GEO PROCESSING COMPLETED ===")
+    message("✅ Successfully processed ", ncol(idat_results$beta_matrix), " samples")
+    message("✅ Beta matrix dimensions: ", paste(dim(idat_results$beta_matrix), collapse = " x "))
+    
+    return(idat_results)
+    
+  }, error = function(e) {
+    # Cleanup on error
+    if (dir.exists(download_dir)) {
+      unlink(download_dir, recursive = TRUE)
+    }
+    stop("GEO processing failed: ", e$message, call. = FALSE)
+  })
+}
+
+#' Create sample sheet with user-defined group mappings
+#'
+#' @param pheno_data Phenotypic data from GEO
+#' @param idat_files Vector of IDAT file paths
+#' @param group_column Column name for groups
+#' @param group_mappings Named list mapping values to groups
+#' @param max_samples Maximum samples to include
+#' @return Data frame with sample sheet
+#' @keywords internal
+create_geo_sample_sheet_with_mappings <- function(pheno_data, idat_files, group_column,
+                                                 group_mappings, max_samples) {
+  
+  # Extract sample identifiers from IDAT files
+  idat_basenames <- unique(gsub("_(Red|Grn)\\.idat$", "", basename(idat_files)))
+  
+  message("Creating sample sheet with user mappings...")
+  message("Phenotypic data samples: ", nrow(pheno_data))
+  message("IDAT basenames found: ", length(idat_basenames))
+  
+  # Match samples between phenotypic data and IDAT files
+  sample_matches <- match_geo_samples(pheno_data, idat_basenames)
+  
+  if (nrow(sample_matches) == 0) {
+    stop("Could not match any samples between phenotypic data and IDAT files")
+  }
+  
+  message("Matched ", nrow(sample_matches), " samples between pheno data and IDAT files")
+  
+  # Apply user-defined group mappings
+  group_values <- as.character(pheno_data[sample_matches$pheno_id, group_column])
+  sample_groups <- character(length(group_values))
+  
+  for (i in seq_along(group_values)) {
+    value <- group_values[i]
+    if (is.na(value) || value == "") {
+      sample_groups[i] <- "Exclude"
+    } else if (value %in% names(group_mappings)) {
+      sample_groups[i] <- group_mappings[[value]]
+    } else {
+      sample_groups[i] <- "Exclude"  # Default for unmapped values
+    }
+  }
+  
+  # Filter out excluded samples - handle NAs safely
+  keep_samples <- !is.na(sample_groups) & sample_groups != "Exclude"
+  sample_matches <- sample_matches[keep_samples, ]
+  sample_groups <- sample_groups[keep_samples]
+  
+  if (nrow(sample_matches) == 0) {
+    stop("No samples remain after applying group mappings. Check your mappings.")
+  }
+  
+  message("After applying mappings: ", nrow(sample_matches), " samples kept")
+  
+  # Limit samples if requested
+  
+  # Handle max_samples safely - check for NA and valid numeric value
+  if (!is.null(max_samples) && !is.na(max_samples) && is.numeric(max_samples) && max_samples > 0) {
+    if (nrow(sample_matches) > max_samples) {
+      keep_idx <- seq_len(max_samples)
+      sample_matches <- sample_matches[keep_idx, ]
+      sample_groups <- sample_groups[keep_idx]
+      message("Limited to first ", max_samples, " samples")
+    }
+  }
+  
+  # Extract sentrix info
+  sentrix_info <- extract_sentrix_info(sample_matches$idat_id)
+  
+  # Handle missing sentrix info safely
+  sentrix_id_na <- is.na(sentrix_info$sentrix_id)
+  sentrix_pos_na <- is.na(sentrix_info$sentrix_position)
+  
+  if (any(sentrix_id_na, na.rm = TRUE) || any(sentrix_pos_na, na.rm = TRUE)) {
+    warning("Some Sentrix IDs or positions could not be extracted. Using fallback values.")
+    
+    na_indices <- which(sentrix_id_na)
+    for (i in na_indices) {
+      sentrix_info$sentrix_id[i] <- paste0("200000000", sprintf("%02d", i))
+    }
+    
+    na_indices <- which(sentrix_pos_na)
+    for (i in na_indices) {
+      sentrix_info$sentrix_position[i] <- paste0("R", sprintf("%02d", ((i-1) %% 8) + 1), "C01")
+    }
+  }
+  
+  # Create sample sheet
+  sample_sheet <- data.frame(
+    Sample_Name = sample_matches$pheno_id,
+    Sentrix_ID = sentrix_info$sentrix_id,
+    Sentrix_Position = sentrix_info$sentrix_position,
+    Sample_Group = sample_groups,
+    GEO_Sample = sample_matches$pheno_id,
+    IDAT_Basename = sample_matches$idat_id,
+    group_column = group_column,
+    stringsAsFactors = FALSE
+  )
+  
+  # Final validation - handle NAs safely
+  # Convert to character and handle NAs
+  sample_sheet$Sample_Name <- as.character(sample_sheet$Sample_Name)
+  sample_sheet$Sentrix_ID <- as.character(sample_sheet$Sentrix_ID)  
+  sample_sheet$Sentrix_Position <- as.character(sample_sheet$Sentrix_Position)
+  
+  # Replace NAs with empty strings to avoid logical operation errors
+  sample_sheet$Sample_Name[is.na(sample_sheet$Sample_Name)] <- ""
+  sample_sheet$Sentrix_ID[is.na(sample_sheet$Sentrix_ID)] <- ""
+  sample_sheet$Sentrix_Position[is.na(sample_sheet$Sentrix_Position)] <- ""
+  
+  # Now check for valid rows - add explicit NA handling
+  name_valid <- !is.na(sample_sheet$Sample_Name) & sample_sheet$Sample_Name != ""
+  id_valid <- !is.na(sample_sheet$Sentrix_ID) & sample_sheet$Sentrix_ID != ""
+  pos_valid <- !is.na(sample_sheet$Sentrix_Position) & sample_sheet$Sentrix_Position != ""
+  
+  valid_rows <- name_valid & id_valid & pos_valid
+  
+  # Handle cases where valid_rows might contain NAs
+  invalid_rows <- !valid_rows
+  invalid_rows[is.na(invalid_rows)] <- TRUE  # Treat NA rows as invalid
+  
+  if (any(invalid_rows, na.rm = TRUE)) {
+    message("Warning: ", sum(invalid_rows, na.rm = TRUE), " samples have invalid data and will be removed")
+    sample_sheet <- sample_sheet[valid_rows & !is.na(valid_rows), ]
+  }
+  
+  if (nrow(sample_sheet) == 0) {
+    stop("No valid samples remain after filtering. Check data quality.")
+  }
+  
+  return(sample_sheet)
 }

@@ -16,6 +16,8 @@ export(read_idat_zip)
 export(validate_geo_dataset)
 export(process_geo_dataset)
 export(diagnose_geo_dataset)
+export(get_geo_phenotype_data)
+export(process_geo_with_mappings)
 
 import(shiny)
 import(DT)

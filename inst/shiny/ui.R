@@ -283,129 +283,202 @@ ui <- dashboardPage(
             # GEO dataset processing
             conditionalPanel(
               condition = "input.dataSource == 'geo'",
-
+              
               fluidRow(
-                column(6,
+                column(12,
                   div(class = "geo-box",
                     h5(icon("database"), " Download from GEO (Gene Expression Omnibus)"),
-                    p("Automatically download and process methylation datasets from NCBI GEO."),
-                    p("GIMP will:"),
-                    tags$ul(
-                      tags$li("Validate the GEO ID and check for IDAT files"),
-                      tags$li("Download raw IDAT files and phenotypic data"),
-                      tags$li("Auto-detect sample groups when possible"),
-                      tags$li("Process data through the standard GIMP pipeline")
-                    )
-                  ),
-
-                  textInput("geoId",
-                    "Enter GEO Accession ID:",
-                    placeholder = "e.g., GSE68777",
-                    value = ""
-                  ),
-
-                  div(id = "geo-validation", class = "file-validation"),
-
-                  helpText("Enter a GEO Series (GSE) accession number. The dataset must contain raw IDAT files."),
-
-                  div(
-                    style = "margin-top: 15px;",
-                    actionButton("validateGEO", "Validate GEO Dataset",
-                      class = "btn-info",
-                      icon = icon("search")
-                    ),
-                    helpText("Check if the dataset exists and contains IDAT files", style = "font-size: 11px; margin-top: 5px;")
-                  )
-                ),
-
-                column(6,
-                  h5("Processing Options:"),
-
-                  textInput("geoGroupColumn", "Group Column (optional):",
-                    placeholder = "e.g., characteristics_ch1.1",
-                    value = ""
-                  ),
-                  helpText("Specify a phenotype column for sample groups, or leave blank for auto-detection."),
-
-                  textInput("geoControlTerms", "Control Terms:",
-                    value = "control,normal,healthy,ctrl",
-                    placeholder = "comma-separated terms"
-                  ),
-                  helpText("Terms that identify control samples (comma-separated)."),
-
-                  textInput("geoCaseTerms", "Case Terms:",
-                    value = "case,disease,tumor,cancer,patient",
-                    placeholder = "comma-separated terms"
-                  ),
-                  helpText("Terms that identify case/treatment samples (comma-separated)."),
-
-                  numericInput("geoMaxSamples", "Maximum Samples:",
-                    value = NULL, min = 10, max = 500, step = 10
-                  ),
-                  helpText("Limit the number of samples to process (leave blank for all)."),
-
-                  selectInput("geoNormMethod", "Normalization Method:",
-                    choices = list(
-                      "Quantile (Recommended)" = "quantile",
-                      "SWAN" = "SWAN",
-                      "Functional Normalization" = "funnorm",
-                      "Noob" = "noob"
-                    ),
-                    selected = "quantile"
-                  ),
-
-                  checkboxInput("geoEnableParallel", "Enable Parallel Processing", value = FALSE),
-
-                  conditionalPanel(
-                    condition = "input.geoEnableParallel == true",
-                    numericInput("geoNCores", "Number of CPU Cores:",
-                      value = 2, min = 1, max = 16, step = 1
+                    p("Process methylation datasets from NCBI GEO with guided group selection."),
+                    
+                    # Step indicators
+                    div(style = "text-align: center; margin: 15px 0;",
+                      span(class = "step", id = "step1", style = "padding: 8px 12px; margin: 0 5px; border-radius: 20px; background-color: #3c8dbc; color: white; font-size: 12px;", "1. Validate"),
+                      span("→", style = "color: #999; margin: 0 5px;"),
+                      span(class = "step", id = "step2", style = "padding: 8px 12px; margin: 0 5px; border-radius: 20px; background-color: #ddd; color: #666; font-size: 12px;", "2. Preview"),
+                      span("→", style = "color: #999; margin: 0 5px;"),
+                      span(class = "step", id = "step3", style = "padding: 8px 12px; margin: 0 5px; border-radius: 20px; background-color: #ddd; color: #666; font-size: 12px;", "3. Groups"),
+                      span("→", style = "color: #999; margin: 0 5px;"),
+                      span(class = "step", id = "step4", style = "padding: 8px 12px; margin: 0 5px; border-radius: 20px; background-color: #ddd; color: #666; font-size: 12px;", "4. Process")
                     )
                   )
                 )
               ),
-
-              # GEO validation results
+              
+              # Step 1: GEO Validation
               conditionalPanel(
-                condition = "output.geoValidated",
-                hr(),
+                condition = "!output.geoStep2Ready",
+                
+                fluidRow(
+                  column(6,
+                    h4(icon("search"), " Step 1: Validate GEO Dataset"),
+                    
+                    textInput("geoId",
+                      "Enter GEO Accession ID:",
+                      placeholder = "e.g., GSE68777, GSE289527",
+                      value = ""
+                    ),
+                    
+                    div(id = "geo-validation", class = "file-validation"),
+                    
+                    helpText("Enter a GEO Series (GSE) accession number. The dataset must contain raw IDAT files."),
+                    
+                    actionButton("validateGEO", "Validate Dataset",
+                      class = "btn-primary",
+                      icon = icon("search")
+                    )
+                  ),
+                  
+                  column(6,
+                    # Validation results
+                    conditionalPanel(
+                      condition = "output.geoValidated",
+                      uiOutput("geoValidationUI")
+                    )
+                  )
+                )
+              ),
+              
+              # Step 2: Preview Phenotypic Data
+              conditionalPanel(
+                condition = "output.geoStep2Ready && !output.geoStep3Ready",
+                
                 fluidRow(
                   column(12,
-                    box(
-                      title = "GEO Dataset Information",
-                      status = "success",
-                      solidHeader = TRUE,
-                      width = 12,
-                      collapsible = TRUE,
-
-                      verbatimTextOutput("geoValidationResult"),
-
-                      br(),
-
-                      conditionalPanel(
-                        condition = "output.geoHasIdats",
-                        div(class = "success-box",
-                          h5(icon("check-circle"), " Dataset Ready for Processing"),
-                          p("This dataset contains IDAT files and is suitable for GIMP analysis."),
-
-                          div(class = "warning-box",
-                            h5(icon("clock"), " Expected Processing Time:"),
-                            p("GEO download and processing can take 10-30 minutes depending on:"),
-                            tags$ul(
-                              tags$li("Dataset size and number of samples"),
-                              tags$li("Internet connection speed"),
-                              tags$li("GEO server response time"),
-                              tags$li("Computer performance")
-                            ),
-                            p(strong("Please be patient and don't close the browser during processing."))
-                          ),
-
-                          actionButton("processGEO", "Download and Process GEO Dataset",
-                            class = "btn-success btn-lg",
-                            icon = icon("download"),
-                            style = "width: 100%; margin-top: 10px;"
-                          )
+                    h4(icon("table"), " Step 2: Preview Phenotypic Data"),
+                    
+                    div(class = "info-box",
+                      p("Review the phenotypic data below and select which column contains sample grouping information."),
+                      p(strong("Instructions:"), "Look for columns that contain group labels like 'control', 'case', 'tumor', 'normal', etc.")
+                    ),
+                    
+                    br(),
+                    
+                    fluidRow(
+                      column(4,
+                        selectInput("groupColumn", 
+                          "Select Grouping Column:",
+                          choices = NULL,
+                          selected = NULL
+                        ),
+                        
+                        helpText("Choose the column that contains sample group information."),
+                        
+                        actionButton("proceedToStep3", "Proceed to Group Mapping",
+                          class = "btn-primary",
+                          icon = icon("arrow-right")
                         )
+                      ),
+                      
+                      column(8,
+                        h5("Column Preview:"),
+                        conditionalPanel(
+                          condition = "input.groupColumn != '' && input.groupColumn != null",
+                          verbatimTextOutput("selectedColumnPreview")
+                        )
+                      )
+                    ),
+                    
+                    br(),
+                    
+                    # Phenotypic data table
+                    div(style = "max-height: 400px; overflow-y: scroll;",
+                      DT::dataTableOutput("phenoDataTable")
+                    )
+                  )
+                )
+              ),
+              
+              # Step 3: Map Groups
+              conditionalPanel(
+                condition = "output.geoStep3Ready && !output.geoStep4Ready",
+                
+                fluidRow(
+                  column(12,
+                    h4(icon("users"), " Step 3: Map Sample Groups"),
+                    
+                    div(class = "info-box",
+                      p("Map the unique values in your selected column to Case, Control, or Exclude."),
+                      p(strong("Tip:"), "You can exclude samples by setting them to 'Exclude'. It's okay to have only Case or only Control samples.")
+                    ),
+                    
+                    br(),
+                    
+                    fluidRow(
+                      column(6,
+                        h5("Group Mapping:"),
+                        uiOutput("groupMappingUI")
+                      ),
+                      
+                      column(6,
+                        h5("Mapping Summary:"),
+                        verbatimTextOutput("groupMappingSummary"),
+                        
+                        br(),
+                        
+                        div(class = "warning-box",
+                          h5(icon("cogs"), " Processing Options:"),
+                          
+                          selectInput("geoNormMethod", "Normalization Method:",
+                            choices = list(
+                              "Quantile (Recommended)" = "quantile",
+                              "SWAN" = "SWAN",
+                              "Functional Normalization" = "funnorm",
+                              "Noob" = "noob"
+                            ),
+                            selected = "quantile"
+                          ),
+                          
+                          numericInput("geoMaxSamples", "Maximum Samples:",
+                            value = NULL, min = 10, max = 500, step = 10
+                          ),
+                          helpText("Limit samples to process (leave blank for all)."),
+                          
+                          checkboxInput("geoEnableParallel", "Enable Parallel Processing", value = FALSE),
+                          
+                          conditionalPanel(
+                            condition = "input.geoEnableParallel == true",
+                            numericInput("geoNCores", "Number of CPU Cores:",
+                              value = 2, min = 1, max = 16, step = 1
+                            )
+                          )
+                        ),
+                        
+                        br(),
+                        
+                        actionButton("proceedToProcessing", "Start Processing",
+                          class = "btn-success btn-lg",
+                          icon = icon("play"),
+                          style = "width: 100%;"
+                        )
+                      )
+                    )
+                  )
+                )
+              ),
+              
+              # Step 4: Processing Status
+              conditionalPanel(
+                condition = "output.geoStep4Ready",
+                
+                fluidRow(
+                  column(12,
+                    h4(icon("cogs"), " Step 4: Processing GEO Dataset"),
+                    
+                    div(class = "warning-box",
+                      h5(icon("clock"), " Processing in Progress..."),
+                      p("GEO download and processing can take 10-30 minutes. Please be patient and don't close the browser."),
+                      
+                      br(),
+                      
+                      # Progress indicators
+                      verbatimTextOutput("geoProcessingLog"),
+                      
+                      br(),
+                      
+                      # Reset button
+                      actionButton("resetGeoProcess", "Start New GEO Analysis",
+                        class = "btn-default",
+                        icon = icon("refresh")
                       )
                     )
                   )
