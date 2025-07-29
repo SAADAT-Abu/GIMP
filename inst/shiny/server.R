@@ -434,6 +434,8 @@ server <- function(input, output, session) {
         if (pheno_result$success) {
           values$geo_pheno_data <- pheno_result
           values$geo_step2_ready <- TRUE
+          # Update step indicator to show step 2 is active
+          session$sendCustomMessage("updateGeoStep", 2)
           
           removeModal()
           showNotification("Dataset validated! Proceeding to phenotypic data review.", 
@@ -592,6 +594,8 @@ server <- function(input, output, session) {
     values$selected_group_column <- input$groupColumn
     values$unique_group_values <- unique_vals
     values$geo_step3_ready <- TRUE
+    # Update step indicator to show step 3 is active
+    session$sendCustomMessage("updateGeoStep", 3)
     
     showNotification("Proceeding to group mapping step.", type = "message")
   })
@@ -712,6 +716,8 @@ server <- function(input, output, session) {
     
     values$group_mappings <- mappings
     values$geo_step4_ready <- TRUE
+    # Update step indicator to show step 4 is active
+    session$sendCustomMessage("updateGeoStep", 4)
     
     showNotification("Starting GEO dataset processing...", type = "message")
   })
@@ -791,6 +797,8 @@ server <- function(input, output, session) {
     values$selected_group_column <- NULL
     values$group_mappings <- NULL
     values$unique_group_values <- NULL
+    # Reset step indicator to step 1
+    session$sendCustomMessage("updateGeoStep", 1)
     
     updateTextInput(session, "geoId", value = "")
     showNotification("GEO analysis reset. You can start a new analysis.", type = "message")
@@ -915,16 +923,24 @@ server <- function(input, output, session) {
       # 1. Failed probe proportion per sample
       if (!is.null(values$qc_metrics$failed_sample_proportion)) {
         failed_prop <- values$qc_metrics$failed_sample_proportion
-        barplot(failed_prop,
-                main = "Failed Probes per Sample",
-                ylab = "Proportion of Failed Probes",
-                xlab = "Samples",
-                las = 2,
-                cex.names = 0.5,
-                col = ifelse(failed_prop > 0.1, "red", "lightblue"))
-        abline(h = 0.1, col = "red", lty = 2)
-        legend("topright", legend = c("Pass", "Fail"),
-               fill = c("lightblue", "red"), cex = 0.8)
+        # Check if we have valid finite values
+        valid_props <- failed_prop[is.finite(failed_prop)]
+        
+        if (length(valid_props) > 0) {
+          barplot(failed_prop,
+                  main = "Failed Probes per Sample",
+                  ylab = "Proportion of Failed Probes",
+                  xlab = "Samples",
+                  las = 2,
+                  cex.names = 0.5,
+                  col = ifelse(is.finite(failed_prop) & failed_prop > 0.1, "red", "lightblue"))
+          abline(h = 0.1, col = "red", lty = 2)
+          legend("topright", legend = c("Pass", "Fail"),
+                 fill = c("lightblue", "red"), cex = 0.8)
+        } else {
+          plot(1, type = "n", axes = FALSE, xlab = "", ylab = "", main = "Failed Probes per Sample")
+          text(1, 1, "No QC metrics available", cex = 1.2, col = "red")
+        }
       }
 
       # 2. Beta value distribution

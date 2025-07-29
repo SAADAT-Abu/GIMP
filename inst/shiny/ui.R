@@ -90,6 +90,23 @@ ui <- dashboardPage(
             $('#geo-validation').html('');
           }
         });
+        
+        // GEO step indicator update
+        Shiny.addCustomMessageHandler('updateGeoStep', function(step) {
+          // Reset all steps to inactive
+          $('#step1, #step2, #step3, #step4').css({
+            'background-color': '#ddd',
+            'color': '#666'
+          });
+          
+          // Activate steps up to current step
+          for (var i = 1; i <= step; i++) {
+            $('#step' + i).css({
+              'background-color': '#3c8dbc',
+              'color': 'white'
+            });
+          }
+        });
       "))
     ),
 
