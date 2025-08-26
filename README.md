@@ -10,12 +10,13 @@
 
 **GIMP** (Genomic Imprinting Methylation Patterns) is an R package designed for the comprehensive analysis of Imprinting Control Regions (ICRs) from methylation array data. It provides a complete pipeline for extracting imprinted CpGs (iCpGs), computing coverage, and analyzing ICRs at both probe and sample-specific levels.
 
-**🆕 NEW in v0.2.0**: GIMP now has a shinyApp that supports **direct processing of raw IDAT files or loading data directly from GEO**, making it a one stop solution genomic imprinting analysis!
+**🆕 NEW in v0.2.0**: GIMP now has a shinyApp that supports **direct processing of raw IDATs, CSV/EXCEL files or GEO dataset**, making it a one-stop solution for genomic imprinting analysis!
 
 ## Features
 
 ### Core Capabilities
-- **Dual Input Support**: Process both preprocessed methylation data and raw IDAT files
+- **Triple Input Support**: Process preprocessed methylation data, raw IDAT files, or GEO datasets
+- **Automated GEO Integration**: Direct download and processing of GEO methylation datasets
 - **Specialized ICR Analysis**: Focus on imprinting control regions with curated coordinates
 - **Interactive Visualizations**: Comprehensive Shiny app with plotly integration
 - **Multiple Array Support**: 450k, EPIC v1, and EPIC v2 arrays
@@ -33,6 +34,16 @@
 
 ### Standard Installation
 
+**Option 1: From r-universe (Recommended)**
+```r
+# Install from r-universe (pre-compiled binaries)
+install.packages("GIMP", repos = c("https://saadat-abu.r-universe.dev", "https://cloud.r-project.org"))
+
+# Load the package
+library(GIMP)
+```
+
+**Option 2: From GitHub (Latest Development)**
 ```r
 # Install devtools if you don't have it
 if (!requireNamespace("devtools", quietly = TRUE)) {
@@ -40,7 +51,7 @@ if (!requireNamespace("devtools", quietly = TRUE)) {
 }
 
 # Install GIMP from GitHub
-devtools::install_github("ngsFC/GIMP")
+devtools::install_github("SAADAT-Abu/GIMP")
 
 # Load the package
 library(GIMP)
@@ -80,7 +91,50 @@ GIMP_app()
 GIMP_app(max_upload_size_mb = 1000)  # 1GB limit
 ```
 
-### Option 2: Command Line Usage
+### Option 2: Using GEO Datasets (NEW!)
+
+```r
+library(GIMP)
+
+# Method 1: Auto-process a GEO dataset (with auto-detection)
+geo_data <- process_geo_dataset(
+  geo_id = "GSE68777",
+  normalize_method = "quantile",
+  n_cores = 4
+)
+
+# Method 2: Validate first, then process
+validation <- validate_geo_dataset("GSE68777")
+if (validation$valid && validation$has_idats) {
+  geo_data <- process_geo_dataset("GSE68777")
+}
+
+# Method 3: User-guided processing with custom group mappings
+pheno_preview <- get_geo_phenotype_data("GSE68777")
+head(pheno_preview$pheno_data)  # Review available columns
+
+# Define your group mappings
+group_mappings <- list(
+  "tumor" = "Case",
+  "normal" = "Control", 
+  "adjacent_normal" = "Control",
+  "unknown" = "Exclude"
+)
+
+geo_data <- process_geo_with_mappings(
+  geo_id = "GSE68777",
+  group_column = "characteristics_ch1.1",
+  group_mappings = group_mappings,
+  max_samples = 50
+)
+
+# Continue with standard GIMP analysis
+ICRcpg <- make_cpgs(Bmatrix = geo_data$beta_matrix, bedmeth = "v1")
+df_ICR <- make_ICRs(Bmatrix = geo_data$beta_matrix, bedmeth = "v1")
+ICRs_heatmap(df_ICR, sampleInfo = geo_data$sample_groups, plot_type = "beta")
+```
+
+### Option 3: Command Line Usage
 
 #### For Preprocessed Data
 ```r
@@ -265,6 +319,13 @@ GIMP_app()
 - `generate_samplesheet_from_idats()`: Auto-generate sample sheets
 - `test_idat_functionality()`: Verify IDAT processing setup
 
+#### GEO Integration Functions (NEW!)
+- `validate_geo_dataset()`: Check if GEO dataset has IDAT files
+- `process_geo_dataset()`: Auto-process GEO dataset with group detection
+- `process_geo_with_mappings()`: Process GEO dataset with custom group mappings
+- `get_geo_phenotype_data()`: Preview GEO phenotypic data for group selection
+- `diagnose_geo_dataset()`: Detailed analysis of GEO dataset structure
+
 #### Utility Functions
 - `plot_cpgs_coverage()`: Visualize CpG coverage
 - `create_sample_sheet_template()`: Generate sample sheet templates
@@ -331,14 +392,6 @@ fix_minfi_installation()
 check_minfi_functions()
 ```
 
-### Memory Requirements
-
-| Dataset Size | Recommended RAM | Processing Time |
-|-------------|-----------------|-----------------|
-| 10-20 samples | 4GB | 2-5 minutes |
-| 50-100 samples | 8GB | 5-15 minutes |
-| 100+ samples | 16GB+ | 15+ minutes |
-
 ### Common Error Solutions
 
 #### "minfi functions not found"
@@ -358,6 +411,30 @@ BiocManager::install("minfi", force = TRUE)
 - Verify no missing values in critical columns
 - Use `diagnose_idat_structure()` for IDAT files
 
+#### "GEO dataset not suitable" 
+```r
+# Diagnose GEO dataset issues
+diag <- diagnose_geo_dataset("GSE12345")
+print(diag$summary)
+
+# Check if dataset has IDAT files
+validation <- validate_geo_dataset("GSE12345")
+if (!validation$has_idats) {
+  message("Dataset contains only processed data, not raw IDAT files")
+}
+```
+
+#### "GEO group detection failed"
+```r
+# Preview phenotypic data
+pheno_preview <- get_geo_phenotype_data("GSE12345")
+head(pheno_preview$pheno_data)
+
+# Use custom mappings
+group_mappings <- list("case" = "Case", "control" = "Control")
+geo_data <- process_geo_with_mappings("GSE12345", "group_column", group_mappings)
+```
+
 ## Data Sources
 
 ### ICR Coordinates
@@ -367,9 +444,10 @@ GIMP uses curated ICR coordinates from:
 
 ### Compatible Data Sources
 - **Illumina methylation arrays**: 450k, EPIC v1, EPIC v2
-- **GEO datasets**: Direct processing of downloaded IDAT files
-- **Preprocessed data**: From other methylation analysis pipelines
+- **GEO datasets**: Automated download and processing of public datasets with IDAT files
+- **Preprocessed data**: From other methylation analysis pipelines (CSV, RDS, Excel)
 - **Clinical samples**: Hospital/research institution data
+- **Raw IDAT files**: ZIP archives from array service providers
 
 ## Contributing
 
@@ -381,7 +459,7 @@ We welcome contributions! Please:
 4. **Share datasets**: Help us test with diverse methylation data
 
 ```
-**Last Updated**: July 2025  
+**Last Updated**: August 2025  
 **Version**: 0.2.0  
 **Contact**: francesco.cecerengs@gmail.com  
 **GitHub**: [https://github.com/ngsFC/GIMP](https://github.com/ngsFC/GIMP)  
@@ -397,24 +475,14 @@ We welcome contributions! Please:
 - **Documentation**: `?function_name` for detailed help
 - **Vignettes**: Comprehensive usage examples
 
-### Frequently Asked Questions
-
-**Q: Can GIMP analyze other genomic regions besides ICRs?**
-A: GIMP is specifically designed for ICR analysis, but the core functions can be adapted for other regions of interest.
-
-**Q: What's the difference between GIMP and shinyepico?**
-A: GIMP focuses specifically on imprinting analysis with specialized ICR coordinates and imprinting disorder detection, while shinyepico is a general-purpose methylation analysis tool.
-
-**Q: Can I use GIMP for non-human samples?**
-A: Currently, GIMP includes human ICR coordinates. For other species, you would need to provide custom ICR coordinates.
 
 ## Acknowledgments
 
-The GIMP package was developed by Francesco Cecere. We gratefully acknowledge:
+The GIMP package is maintained by Abu Saadat, with contributions from Francesco Cecere. We gratefully acknowledge:
 
-- **National Centre for HPC, Big Data and Quantum Computing** for computational resources
 - **Bioconductor community** for methylation analysis infrastructure
 - **minfi developers** for IDAT processing capabilities
+- **GEOquery developers** for seamless GEO data access
 - **shinyepico** for inspiration on user-friendly methylation analysis
 
 ## License

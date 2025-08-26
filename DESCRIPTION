@@ -2,10 +2,10 @@ Package: GIMP
 Title: Genomic Imprinting Methylation Patterns
 Version: 0.2.0
 Authors@R: c(
-    person(given = "Francesco", family = "Cecere", role = "cre",
-           email = "francesco.cecerengs@gmail.com"),
-    person(given = "Abu", family = "Saadat", role = "aut",
-           email = "saadatabu1996@gmail.com"))
+    person(given = "Abu", family = "Saadat", role = c("cre", "aut"),
+           email = "saadatabu1996@gmail.com"),
+    person(given = "Francesco", family = "Cecere", role = "aut",
+           email = "francesco.cecerengs@gmail.com"))
 Description: A package for analyzing Imprinting Control Regions (ICRs) DNA methylation.
     Supports both processed methylation data and raw IDAT files from Illumina arrays.
     Provides specialized tools for imprinting analysis including defect detection
@@ -14,14 +14,14 @@ License: MIT
 Encoding: UTF-8
 LazyDataCompression: xz
 RoxygenNote: 7.3.2
-Depends: R (>= 4.4.3), tidyverse, valr, reshape2, ggplot2, pheatmap,
-        viridisLite, ggplotify, readr, shiny, plotly, BiocManager,
-        minfi, doParallel
+Depends: R (>= 4.4.3)
 Imports: shiny, shinydashboard, DT, plotly, minfi,
         IlluminaHumanMethylation450kanno.ilmn12.hg19,
         IlluminaHumanMethylationEPICanno.ilm10b4.hg19,
         IlluminaHumanMethylationEPICv2anno.20a1.hg38, readxl, tools,
-        utils, stats
+        utils, stats, tidyverse, valr, reshape2, ggplot2, pheatmap,
+        viridisLite, ggplotify, readr, BiocManager, doParallel,
+        Biobase, GEOquery, limma, tibble, dplyr, pheatmap
 Suggests: knitr, rmarkdown, testthat
 VignetteBuilder: knitr
 biocViews: DNAMethylation, Microarray, Preprocessing, QualityControl,

@@ -2,7 +2,7 @@
 
 ## Overview
 
-The GIMP (Genomic Imprinting Methylation Patterns) Shiny app provides an interactive interface for analyzing methylation patterns at Imprinted Control Regions (ICRs) from both preprocessed methylation data and raw IDAT files. This comprehensive tool is designed for researchers studying genomic imprinting disorders and DNA methylation patterns.
+The GIMP (Genomic Imprinting Methylation Patterns) Shiny app provides an interactive interface for analyzing methylation patterns at Imprinted Control Regions (ICRs) from preprocessed methylation data, raw IDAT files, or GEO datasets. This comprehensive tool is designed for researchers studying genomic imprinting disorders and DNA methylation patterns.
 
 ## Getting Started
 
@@ -25,7 +25,7 @@ GIMP_app(max_upload_size_mb = 1000)  # 1GB limit
 
 ## Data Input Options
 
-GIMP supports two types of input data:
+GIMP supports three types of input data:
 
 ### Option 1: Processed Methylation Data
 **Best for**: GEO datasets, preprocessed data, quick analysis
@@ -56,12 +56,38 @@ methylation_data.zip
 └── samplesheet.csv
 ```
 
-### Option 3: GEO Dataset 
-**Best for**: Publically available data in GEO
+### Option 3: GEO Dataset (NEW!)
+**Best for**: Public datasets with raw IDAT files from GEO
 
- - Enter a GEO Series ID (e.g., GSE68777)
- - Validate the dataset to check for IDAT files
- - Configure processing options (group detection, normalization)
+**How to use**:
+1. Enter a GEO Series ID (e.g., GSE68777)
+2. Click **"Validate Dataset"** to check for IDAT files
+3. Review dataset information and phenotypic data
+4. Configure processing options:
+   - **Group Detection**: Auto-detect or manual mapping
+   - **Normalization Method**: Quantile (recommended), SWAN, funnorm, noob
+   - **Max Samples**: Limit for faster processing
+5. Click **"Process GEO Dataset"**
+
+**Supported GEO Datasets**:
+- Must contain raw IDAT files (not just processed data)
+- Supported arrays: 450k, EPIC v1, EPIC v2
+- Both restricted and public access datasets
+
+**Example workflow**:
+```
+GSE68777 → Validate → Review Groups → Auto-process → Analyze
+```
+
+**Recommended Test Datasets**:
+- **GSE68777**: Beckwith-Wiedemann syndrome study (EPIC v1)
+- **GSE125527**: Imprinting disorder cohort (450k array)  
+- **GSE99863**: Pediatric cancer methylation (EPIC v1)
+
+**Dataset Selection Tips**:
+- Look for "raw" or "idat" in supplementary files description
+- Check array platform: GPL13534 (450k), GPL21145 (EPIC), GPL23976 (EPIC v2)
+- Prefer datasets with clear control/case group descriptions
  
 ## Sample Sheet Creation Guide
 
@@ -166,6 +192,34 @@ write.csv(new_sheet, "corrected_samplesheet.csv", row.names = FALSE)
 5. Click **"Process IDAT Files"**
 6. Wait for processing (can take 5-15 minutes)
 
+#### For GEO Datasets
+1. Select **"GEO Dataset"** 
+2. Enter GEO Series ID (e.g., "GSE68777")
+3. Click **"Validate Dataset"**
+4. Review validation results:
+   - ✅ Dataset found with IDAT files: Proceed to step 5
+   - ❌ No IDAT files found: Try a different dataset
+   - ⚠️ Dataset found but may have issues: Check diagnostic info
+5. **Configure processing options**:
+   - **Group Detection Method**:
+     - **Auto-detect**: Let GIMP find control/case groups
+     - **Manual mapping**: Define custom group assignments
+   - **Max Samples**: Limit samples for faster processing
+   - **Normalization**: Quantile (recommended)
+6. **Optional: Review phenotypic data**
+   - Click **"Show Phenotypic Data"** to see available columns
+   - Select appropriate grouping column if using manual mapping
+7. Click **"Process GEO Dataset"**
+8. Wait for download and processing (can take 10-30 minutes depending on dataset size)
+
+**GEO Processing Status Indicators**:
+- 📊 Validating dataset...
+- 📥 Downloading files...
+- 🔍 Extracting IDAT files...
+- 📋 Creating sample sheet...
+- 🔧 Processing with minfi...
+- ✅ Processing complete!
+
 ### Step 2: CpG Coverage Analysis
 
 **Purpose**: Assess how well your array covers ICR regions
@@ -268,12 +322,17 @@ write.csv(new_sheet, "corrected_samplesheet.csv", row.names = FALSE)
 - **Very large datasets**: Consider command-line processing
 
 ### Typical File Sizes
-| Array Type | Samples | Processed Data | IDAT ZIP |
-|-----------|---------|----------------|----------|
-| 450k | 10-20 | 50-100MB | 100-200MB |
-| EPIC v1 | 10-20 | 100-200MB | 200-400MB |
-| EPIC v2 | 10-20 | 150-300MB | 300-600MB |
-| EPIC v1 | 50+ | 500MB+ | 1GB+ |
+| Array Type | Samples | Processed Data | IDAT ZIP | GEO Processing Time |
+|-----------|---------|----------------|----------|-------------------|
+| 450k | 10-20 | 50-100MB | 100-200MB | 5-10 minutes |
+| EPIC v1 | 10-20 | 100-200MB | 200-400MB | 10-15 minutes |
+| EPIC v2 | 10-20 | 150-300MB | 300-600MB | 15-20 minutes |
+| EPIC v1 | 50+ | 500MB+ | 1GB+ | 20-30 minutes |
+
+**GEO Processing Notes**:
+- Download time depends on network speed and GEO server load
+- Processing time includes download, extraction, and minfi processing
+- Use max_samples parameter to limit dataset size for testing
 
 ### Optimization Tips
 - **Compress ZIP files** with maximum compression
@@ -406,6 +465,48 @@ BiocManager::install("IlluminaHumanMethylationEPICanno.ilm10b4.hg19")
 test_idat_functionality()
 ```
 
+### GEO Dataset Issues
+
+#### "GEO dataset not found"
+- **Check GEO ID format**: Should be "GSE" followed by numbers (e.g., GSE68777)
+- **Verify dataset exists**: Check [GEO website](https://www.ncbi.nlm.nih.gov/geo/) 
+- **Network connectivity**: Ensure internet connection is stable
+
+#### "No IDAT files found in dataset"
+**Cause**: Dataset contains only processed data, not raw IDAT files
+**Solutions**:
+- Look for datasets with "raw" or "idat" in supplementary files
+- Try similar studies from the same research group
+- Use processed data option instead
+
+#### "GEO group detection failed"
+**Symptoms**: Warning about automatic group assignment
+**Solutions**:
+```r
+# Method 1: Use manual group mapping
+# 1. Review phenotypic data first
+# 2. Identify appropriate grouping column
+# 3. Define custom mappings (Control/Case/Exclude)
+
+# Method 2: Check common group column names
+# Look for columns containing: group, condition, treatment, disease, status
+```
+
+#### "GEO processing timeout"
+**Cause**: Large dataset or slow network connection
+**Solutions**:
+- Reduce max_samples parameter (try 20-50 samples first)
+- Use stable, fast internet connection
+- Try processing during off-peak hours
+- Consider command-line processing for very large datasets
+
+#### "Cannot extract compressed files"
+**Cause**: Corrupted downloads or unsupported compression
+**Solutions**:
+- Retry download (clear browser cache if using web interface)
+- Check available disk space
+- Try different dataset if problem persists
+
 ### Analysis Issues
 
 #### "No ICRs found"
@@ -449,8 +550,9 @@ test_idat_functionality()
 ### Documentation Resources
 - **Function Help**: Use `?function_name` in R console for detailed documentation
 - **Package Vignettes**: Comprehensive examples and workflows
-- **GitHub Repository**: [https://github.com/ngsFC/GIMP](https://github.com/ngsFC/GIMP)
+- **GitHub Repository**: [https://github.com/SAADAT-Abu/GIMP](https://github.com/saadat-abu/GIMP)
 - **Issue Tracker**: Report bugs and request features on GitHub
+- **R-universe**: [https://saadat-abu.r-universe.dev/GIMP](https://saadat-abu.r-universe.dev/GIMP)
 
 ### Common Error Messages
 
@@ -554,7 +656,7 @@ For additional support, please consult the documentation, GitHub repository, or 
 
 ---
 
-**Last Updated**: July 2025  
+**Last Updated**: August 2025  
 **Version**: 0.2.0  
 **Contact**: francesco.cecerengs@gmail.com  
 **GitHub**: [https://github.com/ngsFC/GIMP](https://github.com/ngsFC/GIMP)  

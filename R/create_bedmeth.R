@@ -24,31 +24,31 @@
 create_bedmeth <- function(version = "v1") {
   
   if (version == "v1") {
-    anno <- getAnnotation("IlluminaHumanMethylationEPICanno.ilm10b4.hg19")
+    anno <- minfi::getAnnotation("IlluminaHumanMethylationEPICanno.ilm10b4.hg19")
     bedmeth <- as.data.frame(anno) %>%
-      rownames_to_column("probeID") %>%
+      tibble::rownames_to_column("probeID") %>%
       dplyr::select(chr, pos, probeID) %>%
-      mutate(end = pos) %>%
-      relocate(end, .after = pos)
+      dplyr::mutate(end = pos) %>%
+      dplyr::relocate(end, .after = pos)
     
     colnames(bedmeth) <- c("chrom", "start", "end", "probeID")
     
   } else if (version == "v2") {
-    anno <- getAnnotation("IlluminaHumanMethylationEPICanno.ilm10b4.hg19")
+    anno <- minfi::getAnnotation("IlluminaHumanMethylationEPICanno.ilm10b4.hg19")
     bedmeth <- as.data.frame(anno) %>%
-      rownames_to_column("probeID") %>%
+      tibble::rownames_to_column("probeID") %>%
       dplyr::select(chr, pos, probeID) %>%
-      mutate(end = pos) %>%
-      relocate(end, .after = pos)
+      dplyr::mutate(end = pos) %>%
+      dplyr::relocate(end, .after = pos)
     
     colnames(bedmeth) <- c("chrom", "start", "end", "probeID")
   } else if (version == "450k") {
-    anno <- getAnnotation("IlluminaHumanMethylation450kanno.ilmn12.hg19")
+    anno <- minfi::getAnnotation("IlluminaHumanMethylation450kanno.ilmn12.hg19")
     bedmeth <- as.data.frame(anno) %>%
-      rownames_to_column("probeID") %>%
+      tibble::rownames_to_column("probeID") %>%
       dplyr::select(chr, pos, probeID) %>%
-      mutate(end = pos) %>%
-      relocate(end, .after = pos)
+      dplyr::mutate(end = pos) %>%
+      dplyr::relocate(end, .after = pos)
     
     colnames(bedmeth) <- c("chrom", "start", "end", "probeID")
     } else {
