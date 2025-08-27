@@ -1,0 +1,8 @@
+^.*\.Rproj$
+^\.Rproj\.user$
+^\.git$
+^\.gitignore$
+^\.claude$
+^inst/shiny/\.Rhistory$
+^README\.md$
+^vignettes/

@@ -52,9 +52,9 @@ check_minfi_functions <- function() {
   
   for (func in required_funcs) {
     if (exists(func, envir = asNamespace("minfi"))) {
-      message("  ✅", func, "- available\n")
+      message("  [OK]", func, "- available\n")
     } else {
-      message("  ❌", func, "- NOT available\n")
+      message("  [ERROR]", func, "- NOT available\n")
     }
   }
   

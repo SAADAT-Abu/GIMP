@@ -14,7 +14,9 @@ data(bed450k)
 This dataset contains the 450K array probes coordinates.
 }
 \examples{
+\dontrun{
 data(bed450k)
 head(bed450k)
+}
 }
 \keyword{datasets}

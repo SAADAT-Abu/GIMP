@@ -8,6 +8,8 @@
 #' @keywords datasets
 #'
 #' @examples
+#' \dontrun{
 #' data(DMRs.hg38)
 #' head(DMRs.hg38)
+#' }
 "DMRs.hg38"

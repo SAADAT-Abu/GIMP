@@ -26,7 +26,9 @@ This function generates a line plot to visualize methylation values across a spe
 Users can choose between a static `ggplot2` plot or an interactive `plotly` plot.
 }
 \examples{
+\dontrun{
 # Example data for significantDMPs
 plot <- plot_line_ICR(significantDMPs, ICRcpg, ICR = "KCNQ1OT1:TSS-DMR", sampleInfo = sampleInfo, interactive = T)
 print(plot)
+}
 }

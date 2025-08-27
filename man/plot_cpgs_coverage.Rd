@@ -19,5 +19,7 @@ This function plots the CpG coverage for Imprinted Control Regions (ICRs) using 
 It compares CpG counts in the specified BED data version for visual analysis and includes an additional plot for percentage coverage.
 }
 \examples{
+\dontrun{
 plot_cpgs_coverage(df_ICR_cpg_counts, bedmeth = "v1")
+}
 }

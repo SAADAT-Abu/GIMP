@@ -12,8 +12,9 @@ Description: A package for analyzing Imprinting Control Regions (ICRs) DNA methy
     Supports both processed methylation data and raw IDAT files from Illumina arrays.
     Provides specialized tools for imprinting analysis including defect detection
     and interactive visualizations.
-License: MIT
+License: GPL-3
 Encoding: UTF-8
+LazyData: true
 LazyDataCompression: xz
 RoxygenNote: 7.3.2
 Depends: R (>= 4.4.3)
@@ -23,7 +24,7 @@ Imports: shiny, shinydashboard, DT, plotly, minfi,
         IlluminaHumanMethylationEPICv2anno.20a1.hg38, readxl, tools,
         utils, stats, tidyverse, valr, reshape2, ggplot2, pheatmap,
         viridisLite, ggplotify, readr, BiocManager, doParallel,
-        Biobase, GEOquery, limma, tibble, dplyr
+        Biobase, GEOquery, limma, tibble, dplyr, tidyr
 Suggests: knitr, rmarkdown, testthat
 VignetteBuilder: knitr
 biocViews: DNAMethylation, Microarray, Preprocessing, QualityControl,

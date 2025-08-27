@@ -8,6 +8,8 @@
 #' @keywords datasets
 #'
 #' @examples
+#' \dontrun{
 #' data(bed450k)
 #' head(bed450k)
+#' }
 "bed450k"

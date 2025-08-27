@@ -8,6 +8,8 @@
 #' @keywords datasets
 #'
 #' @examples
+#' \dontrun{
 #' data(bedEPICv2)
 #' head(bedEPICv2)
+#' }
 "bedEPICv2"

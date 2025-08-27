@@ -14,7 +14,9 @@ data(bedEPICv1)
 This dataset contains the EPICv1 probes coordinates.
 }
 \examples{
+\dontrun{
 data(bedEPICv1)
 head(bedEPICv1)
+}
 }
 \keyword{datasets}

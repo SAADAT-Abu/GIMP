@@ -23,11 +23,13 @@
 #' invisibly once the app is closed.
 #'
 #' @examples
+#' \dontrun{
 #' # Launch the GIMP Shiny app
 #' GIMP_app()
 #' 
 #' # Launch with larger upload limit
 #' GIMP_app(max_upload_size_mb = 1000)
+#' }
 #'
 #' @export
 GIMP_app <- function(max_upload_size_mb = 500) {

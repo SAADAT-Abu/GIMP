@@ -13,12 +13,14 @@
 #'   \item{probeID}{Unique identifier for each probe.}
 #'   \item{end}{End position, which is the same as `pos` in this output.}
 #' @examples
+#' \dontrun{
 #' # Create BED-format data with the default version (EPIC v1)
 #' bed_data <- create_bedmeth()
 #' head(bed_data)  # View the first few rows
 #' 
 #' # Use a different annotation version if available
 #' bed_data_v2 <- create_bedmeth(version = "v2")
+#' }
 #' @export
 
 create_bedmeth <- function(version = "v1") {

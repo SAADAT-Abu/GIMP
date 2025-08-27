@@ -30,10 +30,12 @@
 #' @import viridisLite
 #' @import ggplotify
 #' @examples
+#' \dontrun{
 #' # Example sampleInfo with "Case" and "Control" labels for each sample
 #' sampleInfo <- c(rep("Case", 10), rep("Control", 10))
 #' ICRs_heatmap(df_ICR = my_ICR_data, sampleInfo = sampleInfo, 
 #'              annotation_col = list(Sample = c("darkgreen", "darkred")))
+#' }
 #' @export
 
 ICRs_heatmap <- function(df_ICR, sampleInfo, control_label = "Control", 

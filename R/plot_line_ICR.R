@@ -11,9 +11,11 @@
 #' @return A plot representing the line plot of methylation values across the specified ICR region, highlighting significant DMPs. 
 #' The plot is either a `ggplot2` object or a `plotly` object, depending on the value of `interactive`.
 #' @examples
+#' \dontrun{
 #' # Example data for significantDMPs
 #' plot <- plot_line_ICR(significantDMPs, ICRcpg, ICR = "KCNQ1OT1:TSS-DMR", sampleInfo = sampleInfo, interactive = T)
 #' print(plot)
+#' }
 #' @export
 plot_line_ICR <- function(significantDMPs, ICRcpg, ICR, sampleInfo, interactive = TRUE) {
 

@@ -305,8 +305,8 @@ process_geo_dataset <- function(geo_id,
     )
 
     message("\n=== GEO PROCESSING COMPLETED ===")
-    message("✅ Successfully processed ", ncol(idat_results$beta_matrix), " samples")
-    message("✅ Beta matrix dimensions: ", paste(dim(idat_results$beta_matrix), collapse = " x "))
+    message("[OK] Successfully processed ", ncol(idat_results$beta_matrix), " samples")
+    message("[OK] Beta matrix dimensions: ", paste(dim(idat_results$beta_matrix), collapse = " x "))
 
     return(idat_results)
 
@@ -343,9 +343,9 @@ extract_compressed_files <- function(dir_path) {
     message("Extracting TAR: ", basename(tar_file))
     tryCatch({
       utils::untar(tar_file, exdir = dirname(tar_file), verbose = TRUE)
-      message("✅ Successfully extracted: ", basename(tar_file))
+      message("[OK] Successfully extracted: ", basename(tar_file))
     }, error = function(e) {
-      message("❌ Failed to extract ", basename(tar_file), ": ", e$message)
+      message("[ERROR] Failed to extract ", basename(tar_file), ": ", e$message)
     })
   }
 
@@ -354,9 +354,9 @@ extract_compressed_files <- function(dir_path) {
     message("Extracting ZIP: ", basename(zip_file))
     tryCatch({
       utils::unzip(zip_file, exdir = dirname(zip_file))
-      message("✅ Successfully extracted: ", basename(zip_file))
+      message("[OK] Successfully extracted: ", basename(zip_file))
     }, error = function(e) {
-      message("❌ Failed to extract ", basename(zip_file), ": ", e$message)
+      message("[ERROR] Failed to extract ", basename(zip_file), ": ", e$message)
     })
   }
 
@@ -376,9 +376,9 @@ extract_compressed_files <- function(dir_path) {
         system(paste("gunzip -c", shQuote(gz_file), ">",
                     shQuote(gsub("\\.gz$", "", gz_file))))
       }
-      message("✅ Successfully extracted: ", basename(gz_file))
+      message("[OK] Successfully extracted: ", basename(gz_file))
     }, error = function(e) {
-      message("❌ Failed to extract ", basename(gz_file), ": ", e$message)
+      message("[ERROR] Failed to extract ", basename(gz_file), ": ", e$message)
     })
   }
 
@@ -462,7 +462,7 @@ find_and_organize_idats <- function(source_dir, target_dir) {
   }
 
   if (length(idat_files) == 0) {
-    message("❌ No IDAT files found")
+    message("[ERROR] No IDAT files found")
 
     # Debug information
     message("\n=== DEBUG INFORMATION ===")
@@ -1039,7 +1039,7 @@ diagnose_geo_dataset <- function(geo_id, temp_dir = NULL) {
         }
       }
     } else {
-      cat("\n❌ NO IDAT FILES FOUND\n")
+      cat("\n[ERROR] NO IDAT FILES FOUND\n")
 
       # Suggest possible issues
       cat("\nPossible issues:\n")
@@ -1336,8 +1336,8 @@ process_geo_with_mappings <- function(geo_id,
     )
     
     message("\n=== GEO PROCESSING COMPLETED ===")
-    message("✅ Successfully processed ", ncol(idat_results$beta_matrix), " samples")
-    message("✅ Beta matrix dimensions: ", paste(dim(idat_results$beta_matrix), collapse = " x "))
+    message("[OK] Successfully processed ", ncol(idat_results$beta_matrix), " samples")
+    message("[OK] Beta matrix dimensions: ", paste(dim(idat_results$beta_matrix), collapse = " x "))
     
     return(idat_results)
     

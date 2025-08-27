@@ -7,7 +7,9 @@
 #' @param bedmeth A character string specifying the BED data version to use for mapping CpG coverage. Options are `"v1"` (EPIC v1), `"v2"` (EPIC v2), or `"450k"` (450k array). Default is `"v1"`.
 #' @return A list containing two plots (counts and percentage coverage) and the data frame with CpG counts and coverage information.
 #' @examples
+#' \dontrun{
 #' plot_cpgs_coverage(df_ICR_cpg_counts, bedmeth = "v1")
+#' }
 #' @export
 
 plot_cpgs_coverage <- function(df_ICR_cpg, bedmeth = "v1") {

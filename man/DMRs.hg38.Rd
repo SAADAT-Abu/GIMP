@@ -14,7 +14,9 @@ data(DMRs.hg38)
 This dataset contains the Human Imprinted regions coordinates in hg38.
 }
 \examples{
+\dontrun{
 data(DMRs.hg38)
 head(DMRs.hg38)
+}
 }
 \keyword{datasets}

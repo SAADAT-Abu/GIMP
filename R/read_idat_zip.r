@@ -18,6 +18,7 @@
 #' \item{failed_samples}{Names of samples that failed QC}
 #' 
 #' @examples
+#' \dontrun{
 #' # Read IDAT files from ZIP
 #' idat_data <- read_idat_zip("my_methylation_data.zip", array_type = "EPIC")
 #' beta_matrix <- idat_data$beta_matrix
@@ -27,6 +28,7 @@
 #' 
 #' # Use with GIMP functions
 #' ICRcpg <- make_cpgs(Bmatrix = beta_matrix, bedmeth = "v1")
+#' }
 #' @export
 read_idat_zip <- function(zip_file, 
                           sample_sheet_name = "samplesheet.csv",
@@ -252,7 +254,7 @@ read_idat_zip <- function(zip_file,
         }
         
         if (!found_match) {
-          message("  ⚠️  No match found for sample: ", sample_sheet$Sample_Name[i], 
+          message("  [WARNING]  No match found for sample: ", sample_sheet$Sample_Name[i], 
                   " (", sample_sheet$Sentrix_ID[i], "_", sample_sheet$Sentrix_Position[i], ")")
         }
       }
@@ -266,7 +268,7 @@ read_idat_zip <- function(zip_file,
     if (any(final_missing_files)) {
       missing_samples <- sample_sheet$Sample_Name[final_missing_files]
       
-      warning("\n❌ FINAL IDAT FILE MATCHING FAILED\n")
+      warning("\n[ERROR] FINAL IDAT FILE MATCHING FAILED\n")
       warning("==================================\n")
       warning("Could not find IDAT files for", length(missing_samples), "samples:\n")
       
@@ -482,7 +484,7 @@ read_idat_zip <- function(zip_file,
       detection_qc_available = !is.null(detP)
     )
     
-    message("✅ Successfully processed", ncol(beta_matrix), "samples and", nrow(beta_matrix), "probes\n")
+    message("[OK] Successfully processed", ncol(beta_matrix), "samples and", nrow(beta_matrix), "probes\n")
     message("=== IDAT PROCESSING COMPLETED ===\n")
     
     # Cleanup
