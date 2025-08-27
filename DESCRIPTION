@@ -1,6 +1,8 @@
 Package: GIMP
 Title: Genomic Imprinting Methylation Patterns
 Version: 0.2.0
+Author: Abu Saadat [aut, cre], Francesco Cecere [aut]
+Maintainer: Abu Saadat <saadatabu1996@gmail.com>
 Authors@R: c(
     person(given = "Abu", family = "Saadat", role = c("cre", "aut"),
            email = "saadatabu1996@gmail.com"),
@@ -21,7 +23,7 @@ Imports: shiny, shinydashboard, DT, plotly, minfi,
         IlluminaHumanMethylationEPICv2anno.20a1.hg38, readxl, tools,
         utils, stats, tidyverse, valr, reshape2, ggplot2, pheatmap,
         viridisLite, ggplotify, readr, BiocManager, doParallel,
-        Biobase, GEOquery, limma, tibble, dplyr, pheatmap
+        Biobase, GEOquery, limma, tibble, dplyr
 Suggests: knitr, rmarkdown, testthat
 VignetteBuilder: knitr
 biocViews: DNAMethylation, Microarray, Preprocessing, QualityControl,
