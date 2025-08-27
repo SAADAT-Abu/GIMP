@@ -1,5 +1,6 @@
 # GIMP: Genomic Imprinting Methylation Patterns
 
+[![Update universe](https://github.com/r-universe/saadat-abu/actions/workflows/sync.yml/badge.svg)](https://github.com/r-universe/saadat-abu/actions/workflows/sync.yml)
 [![R](https://img.shields.io/badge/R-4.0+-blue.svg)](https://cran.r-project.org/)
 [![Bioconductor](https://img.shields.io/badge/Bioconductor-3.14+-green.svg)](https://bioconductor.org/)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
