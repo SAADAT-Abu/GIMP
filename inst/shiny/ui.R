@@ -14,6 +14,13 @@ ui <- dashboardPage(
       menuItem("Differential Analysis", tabName = "dmps", icon = icon("chart-line")),
       menuItem("Region Explorer", tabName = "explorer", icon = icon("search")),
       menuItem("Help", tabName = "help", icon = icon("question-circle"))
+    ),
+    # University logo at bottom of sidebar
+    div(
+      style = "position: fixed; bottom: 10px; left: 10px; width: 220px; text-align: center;",
+      img(src = "university_logo.png",
+          height = "80px",
+          style = "max-width: 200px; opacity: 0.8;")
     )
   ),
 
@@ -797,8 +804,8 @@ ui <- dashboardPage(
                 style = "background-color: #f8f9fa; padding: 15px; border-radius: 5px;",
                 h5("Plot Information:"),
                 tags$ul(
-                  tags$li("Blue lines/points: Control samples"),
-                  tags$li("Red lines/points: Case samples"),
+                  tags$li("Yellow lines/points: Control samples"),
+                  tags$li("Purple lines/points: Case samples"),
                   tags$li("Vertical dashed lines: Significant DMP positions"),
                   tags$li("Red rug marks: Significant DMPs"),
                   tags$li("Larger points: CpGs that are significant DMPs")
@@ -884,7 +891,7 @@ ui <- dashboardPage(
             h4("Citations:"),
             p("If you use GIMP in your research, please cite:"),
             tags$ul(
-              tags$li("Cecere, F. (2024). GIMP: Genomic Imprinting Methylation Patterns. R package."),
+              tags$li("Saadat, A., Cecere, F. (2025). GIMP: Genomic Imprinting Methylation Patterns. R package."),
               tags$li("ICR coordinates from: Joshi et al. (2016) Epigenetics, DOI: 10.1080/15592294.2016.1264561")
             )
           )
