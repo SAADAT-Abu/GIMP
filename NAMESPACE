@@ -20,8 +20,6 @@ export(get_geo_phenotype_data)
 export(process_geo_with_mappings)
 
 import(shiny)
-importFrom(DT, renderDataTable)
-importFrom(DT, dataTableOutput)
 importFrom(DT, datatable)
 importFrom(limma, lmFit)
 importFrom(limma, eBayes)
