@@ -24,11 +24,12 @@ Imports: shiny, shinydashboard, DT, plotly, minfi,
         IlluminaHumanMethylationEPICv2anno.20a1.hg38,
         IlluminaHumanMethylationEPICmanifest,
         IlluminaHumanMethylation450kmanifest,
-        IlluminaHumanMethylationEPICv2manifest, readxl, tools,
-        utils, stats, tidyverse, valr, reshape2, ggplot2, pheatmap,
-        viridisLite, ggplotify, readr, BiocManager, doParallel,
-        R.utils, Biobase, GEOquery, limma, tibble, dplyr, tidyr, BiocParallel
-Suggests: knitr, rmarkdown, testthat
+        IlluminaHumanMethylationEPICv2manifest, tools,
+        utils, stats, valr, reshape2, ggplot2, pheatmap,
+        viridisLite, ggplotify, readr, BiocManager,
+        R.utils, Biobase, GEOquery, limma, tibble, dplyr, tidyr, 
+        BiocParallel
+Suggests: knitr, rmarkdown, testthat, readxl, doParallel
 VignetteBuilder: knitr
 biocViews: DNAMethylation, Microarray, Preprocessing, QualityControl,
         DifferentialMethylation, Epigenetics, MethylationArray
