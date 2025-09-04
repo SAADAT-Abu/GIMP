@@ -47,7 +47,7 @@ check_minfi_functions <- function() {
   # Test specific functions we need
   message("\nTesting required functions:\n")
   
-  required_funcs <- c("read.metharray.exp", "getBeta", "getDetectionP", "detectionP", 
+  required_funcs <- c("read.metharray.exp", "getBeta", "detectionP", 
                       "preprocessQuantile", "preprocessSWAN", "preprocessFunnorm", "preprocessNoob")
   
   for (func in required_funcs) {
@@ -93,8 +93,8 @@ calculate_detection_pvalues <- function(rgSet) {
   
   tryCatch({
     # Method 2: Alternative name
-    if (exists("getDetectionP", envir = asNamespace("minfi"))) {
-      return(minfi::getDetectionP(rgSet))
+    if (exists("detectionP", envir = asNamespace("minfi"))) {
+      return(minfi::detectionP(rgSet))
     }
   }, error = function(e) {
     message("Method 2 failed:", e$message, "\n")
