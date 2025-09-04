@@ -27,7 +27,7 @@ Imports: shiny, shinydashboard, DT, plotly, minfi,
         IlluminaHumanMethylationEPICv2manifest, readxl, tools,
         utils, stats, tidyverse, valr, reshape2, ggplot2, pheatmap,
         viridisLite, ggplotify, readr, BiocManager, doParallel,
-        Biobase, GEOquery, limma, tibble, dplyr, tidyr
+        R.utils, Biobase, GEOquery, limma, tibble, dplyr, tidyr, BiocParallel
 Suggests: knitr, rmarkdown, testthat
 VignetteBuilder: knitr
 biocViews: DNAMethylation, Microarray, Preprocessing, QualityControl,
