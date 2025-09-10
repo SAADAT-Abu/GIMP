@@ -28,8 +28,8 @@ Imports: shiny, shinydashboard, DT, plotly, minfi,
         utils, stats, valr, reshape2, ggplot2, pheatmap,
         viridisLite, ggplotify, readr, BiocManager,
         R.utils, Biobase, GEOquery, limma, tibble, dplyr, tidyr, 
-        BiocParallel
-Suggests: knitr, rmarkdown, testthat, readxl, doParallel
+        BiocParallel, readxl, doParallel
+Suggests: knitr, rmarkdown, testthat
 VignetteBuilder: knitr
 biocViews: DNAMethylation, Microarray, Preprocessing, QualityControl,
         DifferentialMethylation, Epigenetics, MethylationArray
