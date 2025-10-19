@@ -9,6 +9,9 @@ extract_compressed_files(dir_path)
 \arguments{
 \item{dir_path}{Directory to search for compressed files}
 }
+\value{
+NULL (invisibly). Function is called for its side effects of extracting files.
+}
 \description{
 Extract compressed files in a directory
 }

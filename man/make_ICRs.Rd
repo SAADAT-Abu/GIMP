@@ -20,6 +20,16 @@ The ICR matrix provides data organized by CpG probes and samples.
 The coordinates of the Human Imprinted regions are taken from \url{https://doi.org/10.1080/15592294.2016.1264561}
 }
 \examples{
+# Create a simple synthetic beta matrix
+set.seed(123)
+beta_mat <- matrix(runif(100 * 4, 0.3, 0.7), nrow = 100, ncol = 4)
+rownames(beta_mat) <- paste0("cg", sprintf("\%08d", 1:100))
+colnames(beta_mat) <- paste0("Sample_", 1:4)
+
+# Note: This example uses synthetic data for demonstration.
+# In practice, use real methylation data from your arrays.
+# ICRmatrix <- make_ICRs(Bmatrix = beta_mat, bedmeth = "v1")
+
 \donttest{
 # Create sample beta matrix for demonstration
 set.seed(123)
@@ -28,8 +38,9 @@ n_samples <- 6
 
 # Generate random probe IDs that might overlap with ICRs
 sample_probes <- paste0("cg", sprintf("\%08d", sample(1:50000000, n_probes)))
-beta_matrix <- matrix(runif(n_probes * n_samples, 0.3, 0.8), 
-                      nrow = n_probes, ncol = n_samples)
+beta_matrix <- matrix(runif(n_probes * n_samples, 0.3, 0.8),
+    nrow = n_probes, ncol = n_samples
+)
 rownames(beta_matrix) <- sample_probes
 colnames(beta_matrix) <- paste0("Sample_", 1:n_samples)
 

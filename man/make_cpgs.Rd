@@ -18,6 +18,15 @@ A data frame representing the ICR CpG matrix, with rows as CpG probes and column
 This function generates a CpG matrix for Imprinted Control Regions (ICR) using methylation data. The CpG matrix is constructed based on the provided BED data version.
 }
 \examples{
+# Create a simple example beta matrix
+set.seed(123)
+beta_matrix <- matrix(runif(100 * 4, 0, 1), nrow = 100, ncol = 4)
+rownames(beta_matrix) <- paste0("cg", sprintf("\%08d", 1:100))
+colnames(beta_matrix) <- paste0("Sample_", 1:4)
+
+# Extract ICR CpGs (will be empty if no probes overlap with ICRs)
+ICRcpg <- make_cpgs(Bmatrix = beta_matrix, bedmeth = "v1")
+
 \donttest{
 # Create sample beta matrix for demonstration
 set.seed(123)
@@ -26,8 +35,9 @@ n_samples <- 6
 
 # Generate random probe IDs that might overlap with ICRs
 sample_probes <- paste0("cg", sprintf("\%08d", sample(1:50000000, n_probes)))
-beta_matrix <- matrix(runif(n_probes * n_samples, 0.3, 0.8), 
-                      nrow = n_probes, ncol = n_samples)
+beta_matrix <- matrix(runif(n_probes * n_samples, 0.3, 0.8),
+    nrow = n_probes, ncol = n_samples
+)
 rownames(beta_matrix) <- sample_probes
 colnames(beta_matrix) <- paste0("Sample_", 1:n_samples)
 

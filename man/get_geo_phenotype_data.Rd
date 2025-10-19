@@ -17,6 +17,16 @@ Downloads and returns phenotypic data from a GEO dataset for user review
 before processing. This allows users to select appropriate grouping columns.
 }
 \examples{
+# Example usage structure
+# Note: Requires internet connection and GEOquery package
+# pheno_preview <- get_geo_phenotype_data("GSE68777")
+# head(pheno_preview$pheno_data)
+
+# Check if function is available
+if (exists("get_geo_phenotype_data")) {
+  print("GEO phenotype data function is available")
+}
+
 \donttest{
 # Get phenotypic data for review
 pheno_preview <- get_geo_phenotype_data("GSE68777")

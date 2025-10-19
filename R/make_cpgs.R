@@ -6,80 +6,82 @@
 #' @param bedmeth A character string specifying the BED data version to use for CpG mapping. Options are `"v1"` (EPIC v1), `"v2"` (EPIC v2), or `"450k"` (450k array). Default is `"v1"`.
 #' @return A data frame representing the ICR CpG matrix, with rows as CpG probes and columns as samples.
 #' @examples
+#' # Create a simple example beta matrix
+#' set.seed(123)
+#' beta_matrix <- matrix(runif(100 * 4, 0, 1), nrow = 100, ncol = 4)
+#' rownames(beta_matrix) <- paste0("cg", sprintf("%08d", 1:100))
+#' colnames(beta_matrix) <- paste0("Sample_", 1:4)
+#'
+#' # Extract ICR CpGs (will be empty if no probes overlap with ICRs)
+#' ICRcpg <- make_cpgs(Bmatrix = beta_matrix, bedmeth = "v1")
+#'
 #' \donttest{
 #' # Create sample beta matrix for demonstration
 #' set.seed(123)
 #' n_probes <- 1000
 #' n_samples <- 6
-#' 
+#'
 #' # Generate random probe IDs that might overlap with ICRs
 #' sample_probes <- paste0("cg", sprintf("%08d", sample(1:50000000, n_probes)))
-#' beta_matrix <- matrix(runif(n_probes * n_samples, 0.3, 0.8), 
-#'                       nrow = n_probes, ncol = n_samples)
+#' beta_matrix <- matrix(runif(n_probes * n_samples, 0.3, 0.8),
+#'     nrow = n_probes, ncol = n_samples
+#' )
 #' rownames(beta_matrix) <- sample_probes
 #' colnames(beta_matrix) <- paste0("Sample_", 1:n_samples)
-#' 
+#'
 #' # Generate the ICR CpG matrix with default BED version (EPIC v1)
 #' ICRcpg <- make_cpgs(Bmatrix = beta_matrix, bedmeth = "v1")
-#' 
+#'
 #' # Use a different BED version, such as EPIC v2
 #' ICRcpg_v2 <- make_cpgs(Bmatrix = beta_matrix, bedmeth = "v2")
 #' }
-#' 
+#'
 #' # Simple usage with your own data:
 #' # ICRcpg <- make_cpgs(Bmatrix = your_beta_matrix, bedmeth = "v1")
 #' @export
 
 make_cpgs <- function(Bmatrix, bedmeth = "v1") {
- 
-  # Load the appropriate bedmeth data based on the bedmeth input
-  if (bedmeth == "v1") {
-    message("Loading bedEPICv1...")
-    data(bedEPICv1)
-    bedmeth_data <- bedEPICv1
-  } else if (bedmeth == "v2") {
-    message("Loading bedEPICv2...")
-    data(bedEPICv2)
-    bedmeth_data <- bedEPICv2
-  } else if (bedmeth == "450k") {
-    message("Loading bed450k...")
-    data(bed450k)
-    bedmeth_data <- bed450k
-  } else {
-    stop("Invalid bedmeth input. Choose from 'v1', 'v2', or '450k'.")
-  }
-  
-  # Load the appropriate ICRs data based on bedmeth input
-  if (bedmeth == "v1" || bedmeth == "450k") {
-    message("Loading DMRs.hg19...")
-    data(DMRs.hg19)
-    ICRs <- DMRs.hg19
-  } else if (bedmeth == "v2") {
-    message("Loading DMRs.hg38...")
-    data(DMRs.hg38)
-    ICRs <- DMRs.hg38
-  }
+    # Load the appropriate bedmeth data based on the bedmeth input
+    if (bedmeth == "v1") {
+        bedmeth_data <- get_bed_data("v1")
+    } else if (bedmeth == "v2") {
+        bedmeth_data <- get_bed_data("v2")
+    } else if (bedmeth == "450k") {
+        bedmeth_data <- get_bed_data("450k")
+    } else {
+        stop("Invalid bedmeth input. Choose from 'v1', 'v2', or '450k'.")
+    }
 
-  # Perform bed intersection between ICRs and bedmeth_data
-  probeICR <- bed_intersect(ICRs, bedmeth_data) %>%
-    mutate(chr = gsub("chr", "", chrom)) %>%
-    mutate(chr = as.numeric(chr)) %>%
-    arrange(chr, start.x) %>%
-    dplyr::select(probeID.y, start.y, ICR.x, start.x, end.x) %>%
-    as.data.frame()
+    # Load the appropriate ICRs data based on bedmeth input
+    if (bedmeth == "v1" || bedmeth == "450k") {
+        message("Loading DMRs.hg19...")
+        data(DMRs.hg19)
+        ICRs <- DMRs.hg19
+    } else if (bedmeth == "v2") {
+        message("Loading DMRs.hg38...")
+        data(DMRs.hg38)
+        ICRs <- DMRs.hg38
+    }
 
-  colnames(probeICR) <- c("probeID", "cstart", "ICR", "start", "end")
+    # Perform bed intersection between ICRs and bedmeth_data
+    probeICR <- bed_intersect(ICRs, bedmeth_data) %>%
+        mutate(chr = gsub("chr", "", chrom)) %>%
+        mutate(chr = as.numeric(chr)) %>%
+        arrange(chr, start.x) %>%
+        dplyr::select(probeID.y, start.y, ICR.x, start.x, end.x) %>%
+        as.data.frame()
 
-  # Create df.ICR.cpg matrix
-  df.ICR.cpg <- as.data.frame(Bmatrix) %>%
-    rownames_to_column("probeID") %>%
-    full_join(probeICR, by = "probeID") %>%
-    na.omit() %>%
-    group_by(ICR) %>%
-    column_to_rownames("probeID") %>%
-    na.omit() %>%
-    as.data.frame()
+    colnames(probeICR) <- c("probeID", "cstart", "ICR", "start", "end")
 
-  return(df.ICR.cpg)
+    # Create df.ICR.cpg matrix
+    df.ICR.cpg <- as.data.frame(Bmatrix) %>%
+        rownames_to_column("probeID") %>%
+        full_join(probeICR, by = "probeID") %>%
+        na.omit() %>%
+        group_by(ICR) %>%
+        column_to_rownames("probeID") %>%
+        na.omit() %>%
+        as.data.frame()
+
+    return(df.ICR.cpg)
 }
-

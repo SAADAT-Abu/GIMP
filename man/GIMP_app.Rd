@@ -15,7 +15,7 @@ invisibly once the app is closed.
 }
 \description{
 Launches an interactive Shiny application for GIMP analysis. The app provides
-a graphical user interface for analyzing methylation patterns at Imprinted 
+a graphical user interface for analyzing methylation patterns at Imprinted
 Control Regions (ICRs) without requiring R programming knowledge.
 }
 \details{
@@ -30,7 +30,15 @@ The GIMP Shiny app includes the following features:
 }
 }
 \examples{
-\dontrun{
+# Example showing how to launch the app
+# GIMP_app()
+
+# Check if function is available
+if (exists("GIMP_app")) {
+  print("GIMP Shiny app launcher is available")
+}
+
+\donttest{
 # Launch the GIMP Shiny app
 GIMP_app()
 

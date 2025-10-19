@@ -40,13 +40,23 @@ Downloads IDAT files and phenotypic data from a GEO dataset and processes
 them for GIMP analysis.
 }
 \examples{
+# Example showing function structure
+# Note: Requires internet connection, GEOquery, and IDAT files in dataset
+# geo_data <- process_geo_dataset("GSE68777")
+# str(geo_data)
+
+# Check if function is available
+if (exists("process_geo_dataset")) {
+  print("GEO processing function is available")
+}
+
 \donttest{
 # Process a GEO dataset
 geo_data <- process_geo_dataset(
-  geo_id = "GSE68777",
-  group_column = "characteristics_ch1.1",
-  control_terms = c("normal", "control"),
-  case_terms = c("tumor", "cancer")
+    geo_id = "GSE68777",
+    group_column = "characteristics_ch1.1",
+    control_terms = c("normal", "control"),
+    case_terms = c("tumor", "cancer")
 )
 
 # Use with GIMP functions

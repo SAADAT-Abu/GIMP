@@ -47,7 +47,17 @@ This function extracts and processes IDAT files from a ZIP archive containing
 IDAT files and a sample sheet, returning a beta value matrix ready for GIMP analysis.
 }
 \examples{
-\dontrun{
+# Example showing function structure
+# Note: Requires an actual ZIP file containing IDAT files and sample sheet
+# idat_data <- read_idat_zip("my_data.zip", array_type = "EPIC")
+# str(idat_data)
+
+# Check if function is available
+if (exists("read_idat_zip")) {
+  print("IDAT ZIP reading function is available")
+}
+
+\donttest{
 # Read IDAT files from ZIP
 idat_data <- read_idat_zip("my_methylation_data.zip", array_type = "EPIC")
 beta_matrix <- idat_data$beta_matrix

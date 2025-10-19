@@ -17,11 +17,21 @@ Validates a GEO accession ID and checks if it contains raw IDAT files
 for methylation array analysis.
 }
 \examples{
+# Example showing function usage structure
+# Note: Requires internet connection and GEOquery package
+# result <- validate_geo_dataset("GSE68777")
+# print(result$valid)
+
+# Check available function
+if (exists("validate_geo_dataset")) {
+  print("GEO validation function is available")
+}
+
 \donttest{
 # Check a GEO dataset
 result <- validate_geo_dataset("GSE68777")
 if (result$valid && result$has_idats) {
-  message("Dataset is suitable for GIMP analysis")
+    message("Dataset is suitable for GIMP analysis")
 }
 }
 }

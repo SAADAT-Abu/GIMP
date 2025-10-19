@@ -1,8 +1,6 @@
 Package: GIMP
 Title: Genomic Imprinting Methylation Patterns
 Version: 0.2.0
-Author: Abu Saadat [aut, cre], Francesco Cecere [aut]
-Maintainer: Abu Saadat <saadatabu1996@gmail.com>
 Authors@R: c(
     person(given = "Abu", family = "Saadat", role = c("cre", "aut"),
            email = "saadatabu1996@gmail.com"),
@@ -14,10 +12,12 @@ Description: A package for analyzing Imprinting Control Regions (ICRs) DNA methy
     and interactive visualizations.
 License: GPL-3
 Encoding: UTF-8
-LazyData: true
+URL: https://github.com/SAADAT-Abu/GIMP
+BugReports: https://github.com/SAADAT-Abu/GIMP/issues
+LazyData: false
 LazyDataCompression: xz
-RoxygenNote: 7.3.2
-Depends: R (>= 4.4.3)
+RoxygenNote: 7.3.3
+Depends: R (>= 4.5.0)
 Imports: shiny, shinydashboard, DT, plotly, minfi,
         IlluminaHumanMethylation450kanno.ilmn12.hg19,
         IlluminaHumanMethylationEPICanno.ilm10b4.hg19,
@@ -29,7 +29,7 @@ Imports: shiny, shinydashboard, DT, plotly, minfi,
         viridisLite, ggplotify, readr, BiocManager,
         R.utils, Biobase, GEOquery, limma, tibble, dplyr, tidyr, 
         BiocParallel, readxl, doParallel
-Suggests: knitr, rmarkdown, testthat
+Suggests: knitr, rmarkdown, testthat, AnnotationHub
 VignetteBuilder: knitr
 biocViews: DNAMethylation, Microarray, Preprocessing, QualityControl,
         DifferentialMethylation, Epigenetics, MethylationArray

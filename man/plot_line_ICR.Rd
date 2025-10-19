@@ -18,7 +18,7 @@ plot_line_ICR(significantDMPs, ICRcpg, ICR, sampleInfo, interactive = TRUE)
 \item{interactive}{A logical value indimessageing whether to return an interactive `plotly` plot (`TRUE`) or a static `ggplot2` plot (`FALSE`). Default is `TRUE`.}
 }
 \value{
-A plot representing the line plot of methylation values across the specified ICR region, highlighting significant DMPs. 
+A plot representing the line plot of methylation values across the specified ICR region, highlighting significant DMPs.
 The plot is either a `ggplot2` object or a `plotly` object, depending on the value of `interactive`.
 }
 \description{
@@ -26,6 +26,43 @@ This function generates a line plot to visualize methylation values across a spe
 Users can choose between a static `ggplot2` plot or an interactive `plotly` plot.
 }
 \examples{
+# Create synthetic data for demonstration
+set.seed(789)
+n_cpgs <- 20
+n_samples <- 6
+
+# Create significant DMPs data
+significantDMPs_example <- data.frame(
+  cstart = seq(1000000, by = 100, length.out = n_cpgs),
+  ICR = rep("KCNQ1OT1:TSS-DMR", n_cpgs),
+  start = 1000000,
+  end = 1002000,
+  P.Value = runif(n_cpgs, 0.001, 0.049)
+)
+
+# Create ICRcpg data
+meth_values <- matrix(runif(n_cpgs * n_samples, 0.3, 0.7),
+                      nrow = n_cpgs, ncol = n_samples)
+colnames(meth_values) <- paste0("Sample_", 1:n_samples)
+
+ICRcpg_example <- data.frame(
+  meth_values,
+  cstart = seq(1000000, by = 100, length.out = n_cpgs),
+  ICR = rep("KCNQ1OT1:TSS-DMR", n_cpgs),
+  start = 1000000,
+  end = 1002000
+)
+
+# Create sample info
+sampleInfo_example <- c(rep("Control", 3), rep("Case", 3))
+
+# Note: This uses synthetic data. In practice, use output from iDMPs()
+# plot <- plot_line_ICR(significantDMPs = significantDMPs_example,
+#                       ICRcpg = ICRcpg_example,
+#                       ICR = "KCNQ1OT1:TSS-DMR",
+#                       sampleInfo = sampleInfo_example,
+#                       interactive = FALSE)
+
 \dontrun{
 # Example data for significantDMPs
 plot <- plot_line_ICR(significantDMPs, ICRcpg, ICR = "KCNQ1OT1:TSS-DMR", sampleInfo = sampleInfo, interactive = T)

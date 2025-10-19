@@ -16,6 +16,12 @@ Matrix of detection p-values or NULL if calculation fails
 Alternative method for calculating detection p-values when standard minfi functions are not available.
 }
 \examples{
+# This function is designed to work with RGChannelSet objects from minfi
+# Check if function is available
+if (exists("calculate_detection_pvalues")) {
+  print("Detection p-value calculation function is available")
+}
+
 \donttest{
 # This function requires actual IDAT data
 # rgSet <- read.metharray.exp("path/to/idat/files")

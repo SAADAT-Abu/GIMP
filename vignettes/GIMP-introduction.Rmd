@@ -14,8 +14,8 @@ vignette: >
 
 ```{r setup, include = FALSE}
 knitr::opts_chunk$set(
-  collapse = TRUE,
-  comment = "#>"
+    collapse = TRUE,
+    comment = "#>"
 )
 ```
 
@@ -36,14 +36,14 @@ To install GIMP from GitHub:
 ```{r install, eval=FALSE}
 # Install devtools if not already installed
 if (!requireNamespace("devtools", quietly = TRUE)) {
-  install.packages("devtools")
+    install.packages("devtools")
 }
 
 # Install GIMP
 devtools::install_github("ngsFC/GIMP")
 ```
 
-```{r load-package, eval=FALSE}
+```{r load-package}
 # Load the package
 library(GIMP)
 ```
@@ -53,15 +53,15 @@ For IDAT file processing, additional Bioconductor packages are required:
 ```{r bioc-install, eval=FALSE}
 # Install BiocManager if not already installed
 if (!requireNamespace("BiocManager", quietly = TRUE)) {
-  install.packages("BiocManager")
+    install.packages("BiocManager")
 }
 
 # Install required annotation packages
 BiocManager::install(c(
-  "minfi",
-  "IlluminaHumanMethylation450kanno.ilmn12.hg19",
-  "IlluminaHumanMethylationEPICanno.ilm10b4.hg19",
-  "IlluminaHumanMethylationEPICv2anno.20a1.hg38"
+    "minfi",
+    "IlluminaHumanMethylation450kanno.ilmn12.hg19",
+    "IlluminaHumanMethylationEPICanno.ilm10b4.hg19",
+    "IlluminaHumanMethylationEPICv2anno.20a1.hg38"
 ))
 ```
 
@@ -105,10 +105,12 @@ ICRs_heatmap(df_ICR, sampleInfo = sampleInfo, plot_type = "beta")
 dmps <- iDMPs(data = ICRcpg, sampleInfo = sampleInfo)
 
 # Plot specific ICR region
-plot_line_ICR(significantDMPs = dmps$significantDMPs, 
-              ICRcpg = ICRcpg, 
-              ICR = "H19", 
-              sampleInfo = sampleInfo)
+plot_line_ICR(
+    significantDMPs = dmps$significantDMPs,
+    ICRcpg = ICRcpg,
+    ICR = "H19",
+    sampleInfo = sampleInfo
+)
 ```
 
 ### Processing Raw IDAT Files
@@ -120,9 +122,9 @@ library(GIMP)
 
 # Process IDAT files from ZIP archive
 idat_data <- read_idat_zip(
-  zip_file = "methylation_data.zip",
-  array_type = "EPIC",
-  normalize_method = "quantile"
+    zip_file = "methylation_data.zip",
+    array_type = "EPIC",
+    normalize_method = "quantile"
 )
 
 # Extract the beta matrix and sample information
@@ -164,12 +166,14 @@ GIMP provides three types of heatmaps:
 # Beta value heatmap
 ICRs_heatmap(df_ICR, sampleInfo = sampleInfo, plot_type = "beta")
 
-# Delta value heatmap  
+# Delta value heatmap
 ICRs_heatmap(df_ICR, sampleInfo = sampleInfo, plot_type = "delta")
 
 # Defect matrix with custom threshold
-ICRs_heatmap(df_ICR, sampleInfo = sampleInfo, plot_type = "defect", 
-             sd_threshold = 2.5)
+ICRs_heatmap(df_ICR,
+    sampleInfo = sampleInfo, plot_type = "defect",
+    sd_threshold = 2.5
+)
 ```
 
 ## Coverage Analysis
@@ -183,7 +187,7 @@ coverage_plots <- plot_cpgs_coverage(ICRcpg, bedmeth = "v1")
 # View count plot
 coverage_plots$plot_counts
 
-# View percentage plot  
+# View percentage plot
 coverage_plots$plot_percentage
 ```
 
@@ -215,10 +219,10 @@ The sample sheet must include these columns:
 ```{r sample-sheet, eval=FALSE}
 # Create a sample sheet template
 template <- create_sample_sheet_template(
-  sample_names = c("Control_01", "Control_02", "Case_01", "Case_02"),
-  sentrix_ids = c("200123456", "200123456", "200123457", "200123457"),
-  sentrix_positions = c("R01C01", "R02C01", "R01C01", "R02C01"),
-  groups = c("Control", "Control", "Case", "Case")
+    sample_names = c("Control_01", "Control_02", "Case_01", "Case_02"),
+    sentrix_ids = c("200123456", "200123456", "200123457", "200123457"),
+    sentrix_positions = c("R01C01", "R02C01", "R01C01", "R02C01"),
+    groups = c("Control", "Control", "Case", "Case")
 )
 
 # Save the template
@@ -245,19 +249,19 @@ validation <- validate_idat_zip("methylation_data.zip")
 ```{r advanced, eval=FALSE}
 # Sensitive DMP detection
 dmps_sensitive <- iDMPs(
-  data = ICRcpg,
-  sampleInfo = sampleInfo,
-  pValueCutoff = 0.01  # More stringent
+    data = ICRcpg,
+    sampleInfo = sampleInfo,
+    pValueCutoff = 0.01 # More stringent
 )
 
 # Custom heatmap styling
 ICRs_heatmap(
-  df_ICR = df_ICR,
-  sampleInfo = sampleInfo,
-  plot_type = "defect",
-  sd_threshold = 2.0,  # More sensitive defect detection
-  order_by = "meth",   # Order by methylation
-  annotation_col = list(Group = c("blue", "red"))
+    df_ICR = df_ICR,
+    sampleInfo = sampleInfo,
+    plot_type = "defect",
+    sd_threshold = 2.0, # More sensitive defect detection
+    order_by = "meth", # Order by methylation
+    annotation_col = list(Group = c("blue", "red"))
 )
 ```
 
@@ -266,16 +270,16 @@ ICRs_heatmap(
 ```{r interactive, eval=FALSE}
 # Generate interactive line plot
 plot_line_ICR(
-  significantDMPs = dmps$significantDMPs,
-  ICRcpg = ICRcpg,
-  ICR = "MEST",
-  sampleInfo = sampleInfo,
-  interactive = TRUE  # Creates plotly interactive plot
+    significantDMPs = dmps$significantDMPs,
+    ICRcpg = ICRcpg,
+    ICR = "MEST",
+    sampleInfo = sampleInfo,
+    interactive = TRUE # Creates plotly interactive plot
 )
 ```
 
 # Session Information
 
-```{r session-info, eval=FALSE}
+```{r session-info}
 sessionInfo()
 ```

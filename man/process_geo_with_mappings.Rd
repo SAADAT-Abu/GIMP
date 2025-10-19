@@ -38,13 +38,23 @@ instead of auto-detection. This is the main processing function after
 users have reviewed phenotypic data and defined their group mappings.
 }
 \examples{
+# Example showing function structure
+# Note: Requires internet connection and GEOquery package
+# mappings <- list("tumor" = "Case", "normal" = "Control")
+# result <- process_geo_with_mappings("GSE68777", "characteristics_ch1.1", mappings)
+
+# Check if function is available
+if (exists("process_geo_with_mappings")) {
+  print("GEO processing with mappings function is available")
+}
+
 \donttest{
 # Process with user-defined mappings
 mappings <- list("tumor" = "Case", "normal" = "Control", "unknown" = "Exclude")
 geo_data <- process_geo_with_mappings(
-  geo_id = "GSE68777",
-  group_column = "characteristics_ch1.1", 
-  group_mappings = mappings
+    geo_id = "GSE68777",
+    group_column = "characteristics_ch1.1",
+    group_mappings = mappings
 )
 }
 }

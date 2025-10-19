@@ -26,6 +26,36 @@ This function identifies differentially methylated positions (DMPs) between
 control and case groups using linear modeling and empirical Bayes methods.
 }
 \examples{
+# Create synthetic methylation data with annotation
+set.seed(123)
+n_cpgs <- 50
+n_controls <- 3
+n_cases <- 3
+
+# Generate synthetic data
+meth_data <- matrix(runif(n_cpgs * (n_controls + n_cases), 0.3, 0.7),
+                    nrow = n_cpgs, ncol = n_controls + n_cases)
+colnames(meth_data) <- c(paste0("Ctrl_", 1:n_controls),
+                         paste0("Case_", 1:n_cases))
+
+# Add annotation columns
+ICRcpg_example <- data.frame(
+  meth_data,
+  cstart = seq(1000000, by = 100, length.out = n_cpgs),
+  ICR = rep(c("ICR1", "ICR2"), length.out = n_cpgs),
+  start = 1000000,
+  end = 1005000
+)
+
+# Create sample info
+sampleInfo_example <- factor(c(rep("Control", n_controls),
+                               rep("Case", n_cases)))
+
+# Note: This uses synthetic data for demonstration
+# dmps <- iDMPs(data = ICRcpg_example,
+#               sampleInfo = sampleInfo_example,
+#               pValueCutoff = 0.05)
+
 \dontrun{
 # Run DMP analysis
 dmps <- iDMPs(data = ICRcpg, sampleInfo = sample_groups)

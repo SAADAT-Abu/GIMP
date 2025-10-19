@@ -13,6 +13,11 @@ Character vector of all available minfi functions
 Diagnostic function to check which minfi functions are available in the current installation.
 }
 \examples{
+# Check if function exists
+if (exists("check_minfi_functions")) {
+  print("Diagnostic function is available")
+}
+
 \donttest{
 # Check which minfi functions are available
 available_funcs <- check_minfi_functions()

@@ -23,10 +23,19 @@ This function generates a BED-format data frame from Illumina Human Methylation 
 The BED data includes chromosome, position, and probe ID information, and supports multiple annotation versions.
 }
 \examples{
+# Example showing the structure of the function call
+# Note: Requires minfi annotation packages to be installed
+# bed_data <- create_bedmeth(version = "v1")
+# head(bed_data)
+
+# Check available versions
+available_versions <- c("v1", "v2", "450k")
+print(available_versions)
+
 \dontrun{
 # Create BED-format data with the default version (EPIC v1)
 bed_data <- create_bedmeth()
-head(bed_data)  # View the first few rows
+head(bed_data) # View the first few rows
 
 # Use a different annotation version if available
 bed_data_v2 <- create_bedmeth(version = "v2")

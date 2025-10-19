@@ -5,18 +5,26 @@
 \alias{bedEPICv2}
 \title{BED EPICv2 probes}
 \format{
-BED file.
+BED file with chromosome, start, end, and probeID columns.
 }
 \usage{
 data(bedEPICv2)
 }
 \description{
-This dataset contains the EPICv2 probes coordinates.
+This dataset contains the EPICv2 array probes coordinates.
+Data is now hosted on AnnotationHub and can be accessed using the
+internal helper function get_bed_data("v2").
+}
+\note{
+For Bioconductor submissions, this data is available via AnnotationHub.
+  Use functions like make_cpgs(), make_ICRs(), and plot_cpgs_coverage()
+  which automatically retrieve the data from AnnotationHub when needed.
 }
 \examples{
 \dontrun{
-data(bedEPICv2)
-head(bedEPICv2)
+# Data is now accessed via AnnotationHub
+# Use GIMP functions directly - they handle data loading:
+# ICRcpg <- make_cpgs(Bmatrix = your_beta_matrix, bedmeth = "v2")
 }
 }
 \keyword{datasets}

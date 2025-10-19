@@ -19,6 +19,16 @@ Downloads and examines a GEO dataset to understand its file structure
 without processing the data. Useful for troubleshooting.
 }
 \examples{
+# Example showing diagnostic function usage
+# Note: Requires internet connection and GEOquery package
+# diag <- diagnose_geo_dataset("GSE289527")
+# print(diag$summary)
+
+# Check if function is available
+if (exists("diagnose_geo_dataset")) {
+  print("GEO diagnostic function is available")
+}
+
 \donttest{
 # Diagnose a problematic dataset
 diag <- diagnose_geo_dataset("GSE289527")

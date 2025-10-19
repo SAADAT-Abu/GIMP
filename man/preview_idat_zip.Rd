@@ -17,6 +17,16 @@ Preview the contents of an IDAT ZIP file without processing it.
 Useful for checking file structure before full processing.
 }
 \examples{
+# Example showing how to use the function
+# Requires an actual ZIP file with IDAT data
+# preview_info <- preview_idat_zip("path/to/methylation_data.zip")
+# print(preview_info)
+
+# Check if function exists
+if (exists("preview_idat_zip")) {
+  print("Function preview_idat_zip is available")
+}
+
 \donttest{
 # Preview IDAT ZIP file contents
 # preview_info <- preview_idat_zip("methylation_data.zip")

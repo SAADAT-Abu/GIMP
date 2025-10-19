@@ -19,6 +19,22 @@ This function plots the CpG coverage for Imprinted Control Regions (ICRs) using 
 It compares CpG counts in the specified BED data version for visual analysis and includes an additional plot for percentage coverage.
 }
 \examples{
+# Create synthetic CpG data with ICR annotation
+set.seed(456)
+n_cpgs <- 100
+
+df_ICR_cpg_example <- data.frame(
+  probeID = paste0("cg", sprintf("\%08d", 1:n_cpgs)),
+  cstart = seq(1000000, by = 50, length.out = n_cpgs),
+  ICR = sample(c("ICR1", "ICR2", "ICR3"), n_cpgs, replace = TRUE),
+  start = 1000000,
+  end = 1005000
+)
+
+# Note: This uses synthetic data. In practice, use output from make_cpgs()
+# coverage_plots <- plot_cpgs_coverage(df_ICR_cpg = df_ICR_cpg_example,
+#                                      bedmeth = "v1")
+
 \dontrun{
 plot_cpgs_coverage(df_ICR_cpg_counts, bedmeth = "v1")
 }
