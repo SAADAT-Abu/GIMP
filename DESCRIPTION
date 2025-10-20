@@ -17,7 +17,7 @@ BugReports: https://github.com/SAADAT-Abu/GIMP/issues
 LazyData: false
 LazyDataCompression: xz
 RoxygenNote: 7.3.3
-Depends: R (>= 4.5.0)
+Depends: R (>= 4.4.0)
 Imports: shiny, shinydashboard, DT, plotly, minfi,
         IlluminaHumanMethylation450kanno.ilmn12.hg19,
         IlluminaHumanMethylationEPICanno.ilm10b4.hg19,
