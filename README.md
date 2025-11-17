@@ -92,6 +92,28 @@ GIMP_app()
 GIMP_app(max_upload_size_mb = 1000)  # 1GB limit
 ```
 
+#### Application Interface
+
+<div align="center">
+  <img src="Screenshots/Screenshot_1.png" alt="GIMP Shiny App - Main Interface" width="800"/>
+  <p><em>Figure 1: Main interface of the GIMP Shiny App</em></p>
+</div>
+
+<div align="center">
+  <img src="Screenshots/Screenshot_2.png" alt="GIMP Shiny App - Data Upload" width="800"/>
+  <p><em>Figure 2: Data upload and processing interface</em></p>
+</div>
+
+<div align="center">
+  <img src="Screenshots/Screenshot_3.png" alt="GIMP Shiny App - ICR Analysis" width="800"/>
+  <p><em>Figure 3: ICR analysis and visualization</em></p>
+</div>
+
+<div align="center">
+  <img src="Screenshots/Screenshot_4.png" alt="GIMP Shiny App - Results" width="800"/>
+  <p><em>Figure 4: Interactive results and heatmap visualization</em></p>
+</div>
+
 ### Option 2: Using GEO Datasets (NEW!)
 
 ```r
